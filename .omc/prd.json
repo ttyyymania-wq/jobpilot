@@ -96,13 +96,14 @@
       "id": "US-008",
       "title": "Supabase 스키마 마이그레이션",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "supabase/migrations/0001_init.sql 존재 — profiles/applications/interviews/commute_cache 4테이블, IF NOT EXISTS, 재실행 안전",
         "applications.status enum(applied/doc_passed/interview/final/rejected) 체크제약",
         "supabase MCP로 jobpilot 프로젝트(cacrjgioedkwxqhxiqbn)에 마이그레이션 적용됨 — list_tables로 4테이블 확인",
         "profile/applications 쓰기를 하는 코드가 anon키는 apikey헤더만 사용(신형키 함정)"
-      ]
+      ],
+      "notes": "PASS 2026-05-31: 사용자가 Supabase SQL Editor(jobpilot 프로젝트 cacrjgioedkwxqhxiqbn)에서 0001_init.sql 실행, Table Editor에서 profiles/applications/interviews/commute_cache 4테이블 확인."
     },
     {
       "id": "US-009",
@@ -132,14 +133,14 @@
       "id": "US-011",
       "title": "demo-smoke:live (라이브 게이트, 가짜완료 방지)",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "e2e/demo-smoke-live.spec.ts 존재 — fallback 비활성, 네트워크 ON",
         "라이브 도구 ≥3종(rocketpunch/commute/gcal 중)이 source:live 로그를 남기며 통과",
         "pnpm demo-smoke:live 실행 시 통과(종료코드 0)",
         "이 게이트는 fixture로 통과 불가(harness 0.2/0.3 라이브게이트)"
       ],
-      "notes": "FAIL (passes=false), 환경/키 한계. 2026-05-31 Executor 실측. ggui_consume 금지 프롬프트 수정 후 라이브 3턴 흐름·렌더는 정상 진행해 어설션까지 도달(이전의 타임아웃 해소). 그러나 '라이브 도구 source:\"live\" 가 1개 감지됨 (필요: 3개 이상)'으로 실패 — search_jobs만 live, get_commute/get_weather/plan_departure는 Swing/ODsay/KMA 외부 API가 현 네트워크/키로 미응답하여 fixture 폴백, gcal=ics(OAuth 미연동). 즉 코드 버그가 아니라 라이브 API 도달 불가(IP/키)로 ≥3 live 미충족. 라이브 게이트 메타테스트는 통과. 수동절차: Swing/ODsay/기상청 API 키·베이스URL·IP허용을 점검해 최소 3종이 실제 source:'live'로 응답하도록 한 뒤 DEMO_LIVE=1 pnpm demo-smoke:live 재실행."
+      "notes": "PASS 2026-05-31: 근본원인=package.json dev:mcps에 dotenv -e .env.local 누락(ggui/agent엔 있는데 mcps만 빠짐)→MCP들이 키 없이 떠서 전부 fixture였음. 수정 후 라이브 재시작하여 실측: rocketpunch search_jobs=live, commute get_commute=live(택시+대중교통 2개), commute get_weather=live. source:live ≥3종 충족(라이브게이트 통과). gcal은 OAuth 토큰 없어 .ics(정상경로)."
     }
   ]
 }
