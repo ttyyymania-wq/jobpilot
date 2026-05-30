@@ -16,3 +16,7 @@ out/
 .DS_Store
 
 # fixtures with PII must be scrubbed before commit (see harness 0.7)
+
+# 내부 기획 문서 — 공개 안 함
+docs/PRD.md
+docs/RALPH-HARNESS-RULES.md
