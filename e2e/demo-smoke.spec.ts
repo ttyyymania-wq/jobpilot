@@ -28,14 +28,19 @@ async function sendMessage(page: Page, text: string): Promise<void> {
 
 /**
  * agent 응답 완료를 기다린다.
- * `data-testid="turn-end"` div가 나타나면 에이전트 턴 종료 (Chat.tsx 참고).
- * 더 느슨하게: Send 버튼이 다시 활성화될 때까지 대기.
+ *
+ * 전송 중에는 버튼이 `aria-label="Stop"`(중단)으로 바뀐다(Chat.tsx).
+ * 턴이 끝나면 sending=false → 버튼이 다시 `aria-label="Send"`로 돌아온다.
+ * (이때 입력창이 비어 있어 Send 버튼은 disabled 상태가 정상 — 활성화를
+ *  기다리면 안 된다. 전송 종료 신호는 "Stop 버튼이 사라지는 것"이다.)
  */
 async function waitForTurnEnd(page: Page, timeout = 90_000): Promise<void> {
-  // Send 버튼이 다시 enabled 되면 에이전트가 응답 완료한 것
-  const sendBtn = page.locator('button[aria-label="Send"]');
-  await sendBtn.waitFor({ state: 'visible', timeout });
-  await expect(sendBtn).toBeEnabled({ timeout });
+  const stopBtn = page.locator('button[aria-label="Stop"]');
+  // 전송 시작 직후 Stop이 나타날 때까지 짧게 대기(이미 떠 있으면 즉시 통과).
+  // 매우 빠른 턴이라 못 잡아도 무방 — 이어서 hidden을 보장한다.
+  await stopBtn.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+  // 턴 종료 = Stop 버튼이 사라짐(sending=false).
+  await stopBtn.waitFor({ state: 'hidden', timeout });
 }
 
 /**

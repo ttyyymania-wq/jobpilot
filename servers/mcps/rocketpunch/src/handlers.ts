@@ -333,6 +333,15 @@ export function registerRocketpunchTools(server: McpServer): void {
         filtered = filtered.filter((j) => j.workType.toUpperCase().includes(loc));
       }
 
+      // Fixture/demo mode: the cached fixtures are a fixed catalog whose
+      // titles/categories may not substring-match a free-form (e.g. Korean)
+      // query, which would leave the demo with zero cards to render. When a
+      // filter empties the result in fixture mode, fall back to the
+      // unfiltered fixture set so the agent always has jobs to render.
+      if (source === 'fixture' && filtered.length === 0 && rawItems.length > 0) {
+        filtered = rawItems;
+      }
+
       const limit = input.limit ?? 20;
       const jobs = filtered.slice(0, limit).map(normalizeJob);
 

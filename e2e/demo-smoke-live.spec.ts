@@ -40,9 +40,12 @@ async function sendMessage(page: Page, text: string): Promise<void> {
 }
 
 async function waitForTurnEnd(page: Page, timeout = 120_000): Promise<void> {
-  const sendBtn = page.locator('button[aria-label="Send"]');
-  await sendBtn.waitFor({ state: 'visible', timeout });
-  await expect(sendBtn).toBeEnabled({ timeout });
+  // 전송 중엔 버튼이 aria-label="Stop". 턴 종료 시 Stop이 사라진다.
+  // (종료 후 Send 버튼은 입력창이 비어 disabled가 정상이므로 enabled를
+  //  기다리면 안 된다.)
+  const stopBtn = page.locator('button[aria-label="Stop"]');
+  await stopBtn.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+  await stopBtn.waitFor({ state: 'hidden', timeout });
 }
 
 async function waitForRenderFrame(page: Page, timeout = 120_000): Promise<void> {
