@@ -135,20 +135,22 @@ interface NormalizedEvent {
 }
 
 function normalizeJob(raw: RawJob): NormalizedJob {
+  // 로켓펀치 라이브 응답은 일부 텍스트 필드를 null로 줄 수 있음(예: subtitle).
+  // outputSchema는 string을 요구하므로 null/undefined를 빈 문자열로 정규화한다.
   return {
     id: raw.jobId,
-    title: raw.title,
-    subtitle: raw.subtitle,
-    company: raw.company.name,
-    companyLogo: raw.company.logoUrl,
-    industry: raw.company.industry,
-    companySize: raw.company.size,
-    category: raw.jobCategory,
-    seniorities: raw.seniorities,
-    employmentTypes: raw.employmentTypes,
-    workType: raw.workType,
-    endsAt: raw.endAt,
-    applyUrl: raw.webUrl,
+    title: raw.title ?? '',
+    subtitle: raw.subtitle ?? '',
+    company: raw.company?.name ?? '',
+    companyLogo: raw.company?.logoUrl ?? '',
+    industry: raw.company?.industry ?? '',
+    companySize: raw.company?.size ?? '',
+    category: raw.jobCategory ?? '',
+    seniorities: raw.seniorities ?? [],
+    employmentTypes: raw.employmentTypes ?? [],
+    workType: raw.workType ?? '',
+    endsAt: raw.endAt ?? '',
+    applyUrl: raw.webUrl ?? '',
   };
 }
 
