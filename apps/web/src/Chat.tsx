@@ -250,8 +250,13 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
       <aside className="chat">
         <header>
           <div className="title">
-            <h1>Agent Chat</h1>
-            <p className="subtitle">MCP Apps · ggui</p>
+            <div className="jp-logo">
+              <span className="jp-logo-icon" aria-hidden="true">🧭</span>
+              <div>
+                <h1>JobPilot</h1>
+                <p className="subtitle">면접 전날 밤까지 챙기는 채용 에이전트</p>
+              </div>
+            </div>
           </div>
           <div className="header-actions">
             <button
@@ -285,7 +290,7 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
         </header>
 
         <div className="history" ref={historyRef} role="log" aria-live="polite">
-          {entries.length === 0 ? <EmptyState /> : null}
+          {entries.length === 0 ? <EmptyState onPrompt={(text) => { void send(text); }} /> : null}
           {entries.map((entry) => (
             <ChatEntryView
               key={entry.id}
@@ -302,7 +307,7 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
         <form onSubmit={onSubmit}>
           <textarea
             name="prompt"
-            placeholder="Ask the agent to render a UI…    (Shift+Enter for newline)"
+            placeholder="이력서를 붙여넣거나, 공고를 찾아달라고 해보세요  (Shift+Enter 줄바꿈)"
             rows={1}
             autoFocus
             value={prompt}
@@ -352,16 +357,34 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
   );
 }
 
-function EmptyState() {
+const QUICK_PROMPTS = [
+  '3년차 프론트엔드 개발자 공고 찾아줘',
+  '내 이력서로 맞는 공고 추천해줘',
+  '토스 면접 6월 5일 오후 2시로 잡혔어',
+  '면접 가는 길이랑 그날 날씨 알려줘',
+] as const;
+
+function EmptyState({ onPrompt }: { onPrompt: (text: string) => void }) {
   return (
     <div className="empty-state">
-      <div className="empty-state-mark">⌘</div>
-      <h2>Generate a UI</h2>
-      <p>Type a prompt below — the agent renders interactive UI inline.</p>
-      <div className="empty-state-examples">
-        <code>weather card for Berlin</code>
-        <code>feedback form with a rating</code>
-        <code>counter that starts at 0</code>
+      <div className="empty-state-mark">🧭</div>
+      <h2>JobPilot에 오신 걸 환영해요</h2>
+      <p>
+        공고 탐색, 일정 등록, 면접 준비, 이동 경로까지
+        <br />
+        채용의 모든 순간을 함께합니다.
+      </p>
+      <div className="jp-quick-prompts">
+        {QUICK_PROMPTS.map((text) => (
+          <button
+            key={text}
+            type="button"
+            className="jp-quick-btn"
+            onClick={() => onPrompt(text)}
+          >
+            {text}
+          </button>
+        ))}
       </div>
     </div>
   );

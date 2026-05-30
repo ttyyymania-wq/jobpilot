@@ -15,34 +15,46 @@
  */
 
 :root {
-  /* Surfaces — sample-agent shell semantics over ggui tokens. */
-  --bg-app: var(--ggui-color-background, #0a0a0c);
-  --bg-chat: var(--ggui-color-surface, #1a1a22);
-  --bg-card: var(--ggui-color-surfaceVariant, #2d2c2a);
-  --surface-subtle: color-mix(in srgb, var(--ggui-color-onSurface, #faf9f5) 4%, transparent);
-  --surface-strong: color-mix(in srgb, var(--ggui-color-onSurface, #faf9f5) 7%, transparent);
+  /* ── JobPilot brand palette (navy/blue, dark GitHub-tone) ── */
+  --jp-bg:        #0d1117;
+  --jp-surface:   #161b22;
+  --jp-card:      #21262d;
+  --jp-fg:        #e6edf3;
+  --jp-fg-muted:  #8b949e;
+  --jp-blue-500:  #3b82f6;
+  --jp-blue-400:  #60a5fa;
+  --jp-blue-600:  #2563eb;
+  --jp-outline:   #30363d;
+  --jp-error:     #ef4444;
+
+  /* Surfaces — overriding ggui token defaults with JobPilot values. */
+  --bg-app: var(--ggui-color-background, var(--jp-bg));
+  --bg-chat: var(--ggui-color-surface, var(--jp-surface));
+  --bg-card: var(--ggui-color-surfaceVariant, var(--jp-card));
+  --surface-subtle: color-mix(in srgb, var(--jp-fg) 4%, transparent);
+  --surface-strong: color-mix(in srgb, var(--jp-fg) 8%, transparent);
 
   /* Borders */
-  --border-subtle: color-mix(in srgb, var(--ggui-color-onSurface, #faf9f5) 10%, transparent);
-  --border-strong: color-mix(in srgb, var(--ggui-color-onSurface, #faf9f5) 18%, transparent);
+  --border-subtle: var(--jp-outline);
+  --border-strong: color-mix(in srgb, var(--jp-fg) 22%, transparent);
 
   /* Text */
-  --fg: var(--ggui-color-onSurface, #faf9f5);
-  --fg-muted: var(--ggui-color-onSurfaceVariant, #a8a59f);
-  --fg-faint: color-mix(in srgb, var(--ggui-color-onSurface, #faf9f5) 40%, transparent);
+  --fg: var(--ggui-color-onSurface, var(--jp-fg));
+  --fg-muted: var(--jp-fg-muted);
+  --fg-faint: color-mix(in srgb, var(--jp-fg) 35%, transparent);
 
-  /* Accent — Claudic terracotta primary (or whatever the active theme exposes). */
-  --accent: var(--ggui-color-primary-500, #cc785c);
-  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
-  --accent-glow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 18%, transparent);
+  /* Accent — JobPilot blue (#3b82f6) replaces Claudic terracotta. */
+  --accent: var(--jp-blue-500);
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --accent-glow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 20%, transparent);
 
   /* Semantic roles */
-  --user-bubble: var(--accent);
-  --user-bubble-fg: var(--ggui-color-onPrimary, #ffffff);
-  --tool-fg: var(--ggui-color-primary-300, #d4a594);
-  --tool-bg: color-mix(in srgb, var(--accent) 10%, transparent);
-  --error: var(--ggui-color-error, #ff6675);
+  --user-bubble: var(--jp-blue-600);
+  --user-bubble-fg: #ffffff;
+  --tool-fg: var(--jp-blue-400);
+  --tool-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --error: var(--jp-error);
   --error-bg: color-mix(in srgb, var(--error) 10%, transparent);
 
   /* Motion */
@@ -73,8 +85,8 @@ body {
    * content (a flat card surface) doesn't compete with. */
   background-color: var(--bg-app);
   background-image:
-    radial-gradient(at 12% 8%, color-mix(in srgb, var(--accent) 12%, transparent) 0px, transparent 50%),
-    radial-gradient(at 88% 92%, color-mix(in srgb, var(--accent) 8%, transparent) 0px, transparent 50%);
+    radial-gradient(at 12% 8%, color-mix(in srgb, var(--jp-blue-600) 10%, transparent) 0px, transparent 50%),
+    radial-gradient(at 88% 92%, color-mix(in srgb, var(--jp-blue-500) 6%, transparent) 0px, transparent 50%);
   color: var(--fg);
   overflow: hidden;
   font-size: 14px;
@@ -813,6 +825,66 @@ code {
   color: var(--fg);
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+/* ── JobPilot quick-prompt buttons ─────────────────────── */
+
+.jp-quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.jp-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.4;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s var(--ease-out);
+}
+
+.jp-quick-btn:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.jp-quick-btn:active {
+  transform: translateY(0);
+}
+
+/* ── JobPilot logo mark in header ───────────────────────── */
+
+.jp-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jp-logo-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  border-radius: 8px;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .msg.turn-end {
