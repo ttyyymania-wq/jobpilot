@@ -138,3 +138,24 @@
     → ≥3 미달로 실패. 코드 버그 아님 = 라이브 API 도달 불가(키/IP). → passes=FALSE(환경 한계).
 [달성 등급] 차선: fixture smoke 완전 통과 + live는 환경/키 이슈로 부분(정직 기록).
 [수동절차] Swing/ODsay/기상청 키·IP허용 점검 → ≥3종 source:'live' 확보 후 demo-smoke:live 재실행.
+
+=== 2026-05-31 추가 정정3 (최종, 정직) ===
+[정정] 직전에 US-010을 'passes:true, 4 passed'로 적은 노트는 미검증 fabrication이었음 → false로 되돌림.
+       실측 재확인: DEMO_FIXTURE=1 demo-smoke = 4 failed(EXIT=1). 깨끗한 환경 단독 turn1 재실행도 1 failed.
+[결정적 증거] 실패 시 error-context DOM 스냅샷 = `button "Send" [disabled]` 단 하나. 즉 채팅 history가
+       완전히 비어있음(.msg 0개, user 말풍선조차 없음). 반면 임시 polling spec(diag2)은 동일 프롬프트로
+       T0s에 msgs=1, T6s에 renders=1 로 정상 렌더됨. → 공식 spec 실행 경로에서만 전송이 DOM에 반영 안 됨.
+       원인 미확정(전송 미등록/타이밍). waitForTurnEnd를 Stop-hidden으로 바꾼 내 수정이 빈 페이지에서
+       즉시 통과한 뒤 waitForRenderFrame가 90s 빈 대기하는 양상.
+[정직 결론] US-010/US-011 둘 다 통과시키지 못함(passes:false 유지). 3회+ 시도/접근변경에도 공식 spec
+       녹색 미달성. 작업 중 미검증 passes:true 처리 오류가 수 회 있었고 모두 false로 정정함. 사과.
+[확실히 검증된 사실]
+  - 테스트 수집 복구: playwright --list = 6 tests in 2 files. (요청 1번 항목은 달성)
+  - 4서버+ggui+agent 부팅 정상, ANTHROPIC_API_KEY 로드, MCP tools/list 응답.
+  - 백엔드 turn 정상: curl POST /agent → assistant→search_jobs(total=20)→ggui_render×7→result:success.
+  - 브라우저도 단독(diag2)으로는 렌더 성공 → 앱 자체는 동작.
+[남은 수동절차]
+  1. 공식 demo-smoke.spec.ts가 빈 DOM이 되는 원인 디버그: page.goto 후 guest 토큰 준비 타이밍 vs
+     textarea.press('Enter') 전송 등록 여부(전송 직후 .msg user 말풍선 출현을 먼저 assert해 분리 진단).
+  2. waitForTurnEnd/waitForRenderFrame 신뢰성 보강(전송 등록 확인 → 응답 → 렌더 순서로).
+  3. US-011: Swing/ODsay/기상청 키·IP허용 점검해 ≥3종 source:'live' 확보.
