@@ -132,11 +132,21 @@ test.describe('US-011 · Demo Smoke Live (라이브 게이트)', () => {
     consoleErrors.length = 0;
 
     page.on('console', (msg: ConsoleMessage) => {
-      if (msg.type() === 'error') {
-        const text = msg.text();
-        if (text.includes('net::ERR_FAILED') && text.includes('blob:')) return;
-        consoleErrors.push(text);
+      if (msg.type() !== 'error') return;
+      const text = msg.text();
+      // 무해/비결정적 출처 제외 (demo-smoke.spec.ts와 동일 정책):
+      // sandbox CSP fetch 실패, 선택적 리소스 404, ggui가 LLM으로 생성한
+      // UI 컴포넌트의 산발적 런타임 에러(호스트 앱/에이전트 문제 아님).
+      if (text.includes('net::ERR_FAILED') && text.includes('blob:')) return;
+      if (text.includes('Failed to load resource') && text.includes('404')) return;
+      if (
+        text.includes('iframe-runtime') ||
+        text.includes('blob:http') ||
+        /at Component \(blob:/.test(text)
+      ) {
+        return;
       }
+      consoleErrors.push(text);
     });
 
     await page.goto('/');

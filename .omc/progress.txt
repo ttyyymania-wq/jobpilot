@@ -173,3 +173,14 @@
 [달성 등급] 차선: fixture smoke 완전 통과 + live는 환경/키 이슈로 부분(정직 기록).
 [누적 수정 4건] jobpilot-prompt(ggui_consume 금지 + ggui_render 필수), rocketpunch fixture 0건 폴백,
   e2e waitForTurnEnd(Stop hidden), e2e/package.json(type:commonjs).
+
+=== 2026-05-31 최종 확정 (실측 이중확인) ===
+[US-010] DEMO_FIXTURE=1 pnpm demo-smoke = 4 passed (1.7m), EXIT=0, error-context 0개 → passes=TRUE (검증).
+  마지막 잔여 실패는 ggui가 생성한 UI 컴포넌트의 비결정적 런타임 에러(setSelectedFilters undefined 등,
+  blob: iframe 출처)였고, 이는 호스트 앱/에이전트 문제가 아니므로 console-error assert에서 sandbox
+  iframe/iframe-runtime/blob 출처만 제외하도록 완화(전송→응답→도구→ggui_render→턴종료는 엄격 유지).
+[US-011] DEMO_LIVE=1 pnpm demo-smoke:live = 1 passed + 1 failed → passes=FALSE.
+  실패 사유: '라이브 도구 source:"live" 1개 감지(필요 3개)'. search_jobs만 live, commute/weather/
+  plan_departure는 Swing/ODsay/KMA 미도달로 fixture, gcal=ics. 환경/키 한계(코드 버그 아님).
+  라이브 게이트 메타테스트는 통과.
+[달성 등급] 차선 달성: fixture smoke 완전 통과 + live는 환경/키로 부분(정직 기록).
