@@ -159,3 +159,17 @@
      textarea.press('Enter') 전송 등록 여부(전송 직후 .msg user 말풍선 출현을 먼저 assert해 분리 진단).
   2. waitForTurnEnd/waitForRenderFrame 신뢰성 보강(전송 등록 확인 → 응답 → 렌더 순서로).
   3. US-011: Swing/ODsay/기상청 키·IP허용 점검해 ≥3종 source:'live' 확보.
+
+=== 2026-05-31 결정적 해결 (ggui_consume 원인 확정) ===
+[진짜 근본원인 확정] 실패 run의 Playwright page snapshot에 'ggui_consume …' 노드 발견.
+  에이전트가 ggui_render 직후 ggui_consume(사용자 클릭 대기)를 호출 → 턴이 끝나지 않고 Stop 버튼
+  영구 표시 → 테스트 타임아웃. (앱·백엔드·SSE는 정상이었음; 진짜 원인은 에이전트 posture.)
+[수정] servers/agent/src/jobpilot-prompt.ts: 절대규칙 4번 추가 — "ggui_render 후 즉시 턴 종료,
+  ggui_consume 호출 금지". (데모는 사용자의 다음 메시지가 다음 턴을 시작하므로 클릭 대기 불필요.)
+[실측 결과 — 수정 후]
+  - US-010 fixture: DEMO_FIXTURE=1 pnpm demo-smoke → failed 라인 0 + error-context 0개 → 4테스트 전부 통과. passes=TRUE.
+  - US-011 live:    DEMO_LIVE=1 pnpm demo-smoke:live → 어설션 도달(타임아웃 해소)했으나
+    'source:"live" 1개(필요 3개)'로 실패. = 환경/키 한계(Swing/ODsay/KMA 미도달→fixture 폴백). passes=FALSE.
+[달성 등급] 차선: fixture smoke 완전 통과 + live는 환경/키 이슈로 부분(정직 기록).
+[누적 수정 4건] jobpilot-prompt(ggui_consume 금지 + ggui_render 필수), rocketpunch fixture 0건 폴백,
+  e2e waitForTurnEnd(Stop hidden), e2e/package.json(type:commonjs).
