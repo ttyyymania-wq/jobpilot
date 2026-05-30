@@ -1,0 +1,18 @@
+# secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# deps / build
+node_modules/
+.next/
+dist/
+build/
+out/
+
+# logs / state
+*.log
+.omc/logs/
+.DS_Store
+
+# fixtures with PII must be scrubbed before commit (see harness 0.7)
