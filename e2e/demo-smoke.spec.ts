@@ -34,12 +34,9 @@ async function sendMessage(page: Page, text: string): Promise<void> {
  * (이때 입력창이 비어 있어 Send 버튼은 disabled 상태가 정상 — 활성화를
  *  기다리면 안 된다. 전송 종료 신호는 "Stop 버튼이 사라지는 것"이다.)
  */
-async function waitForTurnEnd(page: Page, timeout = 90_000): Promise<void> {
+async function waitForTurnEnd(page: Page, timeout = 150_000): Promise<void> {
+  // 턴 종료 = 전송 중 표시되는 Stop 버튼(aria-label)이 사라짐(sending=false).
   const stopBtn = page.locator('button[aria-label="Stop"]');
-  // 전송 시작 직후 Stop이 나타날 때까지 짧게 대기(이미 떠 있으면 즉시 통과).
-  // 매우 빠른 턴이라 못 잡아도 무방 — 이어서 hidden을 보장한다.
-  await stopBtn.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-  // 턴 종료 = Stop 버튼이 사라짐(sending=false).
   await stopBtn.waitFor({ state: 'hidden', timeout });
 }
 
@@ -50,7 +47,7 @@ async function waitForTurnEnd(page: Page, timeout = 90_000): Promise<void> {
  *
  * 셀렉터 가정: .render-frame 내부에 iframe이 생성됨 (ggui AppRenderer 기준).
  */
-async function waitForRenderFrame(page: Page, timeout = 90_000): Promise<void> {
+async function waitForRenderFrame(page: Page, timeout = 120_000): Promise<void> {
   // 패널 레이아웃: .ui-pane 내부 / 인라인 레이아웃: .history 내부
   // 어느 쪽이든 .render-frame 이 나타나면 UI가 마운트된 것
   await page.locator('.render-frame').first().waitFor({ state: 'visible', timeout });

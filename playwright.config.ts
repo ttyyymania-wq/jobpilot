@@ -17,8 +17,12 @@ const BASE_URL = `http://localhost:${WEB_PORT}`;
 
 export default defineConfig({
   testDir: 'e2e',
-  timeout: 120_000,          // LLM 응답 포함 1턴 최대 2분
-  expect: { timeout: 60_000 }, // UI 렌더 대기 최대 60초
+  // 한 테스트가 3턴까지 연속 실행하며, 각 턴은 에이전트 응답 + ggui의
+  // 런타임 UI 생성(LLM)을 포함한다. 실측 백엔드 소요: 턴1~27s / 턴2~68s /
+  // 턴3~42s (합계 ~140s) + 브라우저 iframe 렌더 오버헤드. 3턴 테스트가
+  // 한 테스트 타임아웃 안에 끝나도록 넉넉히 설정.
+  timeout: 360_000,          // 테스트당 최대 6분 (3턴 + 렌더 여유)
+  expect: { timeout: 90_000 }, // 단일 UI 렌더 대기 최대 90초
 
   // 각 spec 파일을 독립 실행 (병렬 시 API 키 공유 충돌 방지)
   workers: 1,
