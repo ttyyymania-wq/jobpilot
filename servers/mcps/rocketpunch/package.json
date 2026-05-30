@@ -1,0 +1,22 @@
+{
+  "name": "@jobpilot/mcp-rocketpunch",
+  "version": "0.0.1",
+  "description": "Standalone MCP server exposing Rocketpunch job/event search tools for the JobPilot agent.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}

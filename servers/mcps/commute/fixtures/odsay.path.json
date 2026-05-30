@@ -1,0 +1,17 @@
+{
+  "result": {
+    "path": [
+      {
+        "pathType": 1,
+        "info": {
+          "totalTime": 32,
+          "payment": 1500,
+          "subwayTransitCount": 1,
+          "busTransitCount": 0,
+          "firstStartStation": "강남역",
+          "lastEndStation": "시청역"
+        }
+      }
+    ]
+  }
+}

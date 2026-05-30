@@ -146,6 +146,25 @@ const DEFAULT_ALLOWED_TOOLS: Record<string, ReadonlyArray<string>> = {
     'mcp__todo__todo_toggle',
     'mcp__todo__todo_delete',
   ],
+  rocketpunch: [
+    'mcp__rocketpunch__search_jobs',
+    'mcp__rocketpunch__get_job',
+    'mcp__rocketpunch__search_events',
+  ],
+  commute: [
+    'mcp__commute__get_commute',
+    'mcp__commute__get_weather',
+    'mcp__commute__plan_departure',
+  ],
+  profile: [
+    'mcp__profile__parse_resume',
+    'mcp__profile__match_jobs',
+  ],
+  gcal: [
+    'mcp__gcal__gcal_get_oauth_url',
+    'mcp__gcal__gcal_create_event',
+    'mcp__gcal__gcal_list_events',
+  ],
 };
 
 /**

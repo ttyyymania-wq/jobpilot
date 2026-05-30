@@ -1,0 +1,26 @@
+{
+  "name": "@jobpilot/mcp-profile",
+  "version": "0.0.1",
+  "description": "Profile MCP server: parses resumes and matches jobs based on skills and job categories.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "jobpilot-mcp-profile": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}

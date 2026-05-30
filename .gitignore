@@ -26,6 +26,9 @@ out/
 .vscode/
 .idea/
 
+# Google OAuth 토큰 — 절대 커밋 금지
+.tokens.json
+
 # fixtures with PII must be scrubbed before commit (harness 0.7)
 
 # 내부 기획 문서 — 공개 안 함

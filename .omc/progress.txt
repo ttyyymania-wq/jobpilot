@@ -1,0 +1,32 @@
+# JobPilot Ralph 진행 원장
+
+## 부트스트랩 (완료, 커밋 12e83bb)
+- GGUI 템플릿 스캐폴딩: apps/web + servers/{agent,ggui,mcps/todo}
+- pnpm install/typecheck/build GREEN
+- 6 라이브 API 키 .env.local 검증 완료
+- .mcp.json: ggui-docs + supabase(jobpilot=cacrjgioedkwxqhxiqbn)
+
+## 학습된 코드베이스 패턴
+- MCP 추가법: servers/mcps/<name> (todo 복제) + .env.local에 GGUI_<NAME>_MCP_URL + agent.ts DEFAULT_ALLOWED_TOOLS에 prefix
+- agent/src/index.ts가 GGUI_*_MCP_URL 패턴을 자동 감지해 등록 (index.ts 수정 불필요, agent.ts allowlist만)
+- MCP 도구 = registerTool(name, {description, inputSchema:zod, outputSchema}, handler) — handler는 {structuredContent, content:[{type:text}]} 반환
+- 각 MCP는 standalone HTTP 서버(McpServer + StreamableHTTPServerTransport), PORT env, /admin/state·/admin/reset 디버그
+- 포트 배정: ggui=6781, todo=6782, rocketpunch=6783, commute=6784, profile=6785, gcal=6786, agent=6790, web=6890
+- 모델: claude-haiku-4-5 (agent.ts 기본)
+- UI코드 안 짬: agent가 ggui_render에 자연어로 UI 묘사 → ggui가 React 생성
+
+## 검증된 API 함정 (docs/RALPH-TASK.md §2 상세)
+- 로켓펀치: /api/v1/jobs (NOT /v1/jobs/search=C9999), keyword 0건→로컬필터, pageSize≤50
+- 스윙: spendTime 초단위, taxi 30/min vehicles 60/min, stage 행사종료시 중단
+- ODsay: apiKey URL인코딩, SX=경도 SY=위도, IP화이트리스트(현장/배포시 재등록)→fixture fallback 필수
+- 기상청: nx61/ny125(강남), base_time 3시간단위, 오늘 강수0%→비오는날 fixture 별도
+- gcal: refresh 7일만료→.ics fallback
+- supabase: 신형키 anon은 apikey헤더만
+
+## 진행 상태
+(이터레이션별로 추가)
+
+## US-001 완료 (픽스처 캡처)
+- fixtures/ 7종: rocketpunch.jobs(710건)/events, swing.taxi(8760원/720s)/vehicles(5대), odsay.path(20분), kma.forecast(맑음)/kma.rainy(데모용 08시 80%, 스키마는 실제 변형)
+- 전국 강수 0%라 비오는날은 실응답 스키마에 POP/PTY/SKY만 변형해 생성(_fixture_note 명시)
+- PII/키 0건 확인

@@ -1,0 +1,26 @@
+{
+  "name": "@jobpilot/mcp-gcal",
+  "version": "0.0.1",
+  "description": "Google Calendar MCP server for JobPilot. Exposes gcal_get_oauth_url, gcal_create_event, gcal_list_events. Falls back to .ics generation when no token is present.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "jobpilot-mcp-gcal": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "google-auth-library": "^9.15.1",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}

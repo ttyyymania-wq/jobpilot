@@ -1,0 +1,15 @@
+{
+  "response": {
+    "header": { "resultCode": "00", "resultMsg": "NORMAL_SERVICE" },
+    "body": {
+      "items": {
+        "item": [
+          { "category": "POP", "fcstValue": "80", "fcstDate": "20260530", "fcstTime": "0800" },
+          { "category": "TMP", "fcstValue": "18", "fcstDate": "20260530", "fcstTime": "0800" },
+          { "category": "SKY", "fcstValue": "4", "fcstDate": "20260530", "fcstTime": "0800" },
+          { "category": "PTY", "fcstValue": "1", "fcstDate": "20260530", "fcstTime": "0800" }
+        ]
+      }
+    }
+  }
+}

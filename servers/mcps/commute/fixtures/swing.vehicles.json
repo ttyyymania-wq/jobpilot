@@ -1,0 +1,7 @@
+{
+  "vehicles": [
+    { "id": "SC-001", "lat": 37.4979, "lng": 127.0276, "battery": 82, "status": "available" },
+    { "id": "SC-002", "lat": 37.4985, "lng": 127.0281, "battery": 65, "status": "available" },
+    { "id": "SC-003", "lat": 37.4971, "lng": 127.0268, "battery": 91, "status": "available" }
+  ]
+}
