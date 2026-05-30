@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.60.0
+        version: 1.60.0
       dotenv-cli:
         specifier: ^8.0.0
         version: 8.0.0
@@ -78,7 +81,7 @@ importers:
     dependencies:
       '@ggui-ai/cli':
         specifier: ^0.2.0-alpha.1
-        version: 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
+        version: 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
 
   servers/mcps/commute:
     dependencies:
@@ -1451,6 +1454,11 @@ packages:
   '@oxc-project/types@0.131.0':
     resolution: {integrity: sha512-PgnWDfV0h+b16XNKbXU7Daib/BFSt/J2mEzfYIBu6JB/wNdlU+kVYXCkGA1A9fWkTbOgbjh4e6NhPeQOYvFhEA==}
 
+  '@playwright/test@1.60.0':
+    resolution: {integrity: sha512-O71yZIbAh/PxDMNGns37GHBIfrVkEVyn+AXyIa5dOTfb4/xNvRWV+Vv/NMbNCtODB/pO7vLlF2OTmMVLhmr7Ag==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
 
@@ -2514,6 +2522,11 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -3233,6 +3246,16 @@ packages:
 
   platform@1.3.6:
     resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
+
+  playwright-core@1.60.0:
+    resolution: {integrity: sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.60.0:
+    resolution: {integrity: sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -4500,7 +4523,7 @@ snapshots:
       - react
       - react-dom
 
-  '@ggui-ai/cli@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)':
+  '@ggui-ai/cli@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)':
     dependencies:
       '@aws-sdk/client-cognito-identity-provider': 3.1056.0
       '@ggui-ai/agent-runtime': 0.2.0-alpha.1
@@ -4510,14 +4533,14 @@ snapshots:
       '@ggui-ai/embedding-local': 0.2.0-alpha.1(@huggingface/transformers@3.8.1)
       '@ggui-ai/gadget-signing': 0.2.0-alpha.1
       '@ggui-ai/iframe-runtime': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(zod@4.4.3)
-      '@ggui-ai/mcp-server': 0.2.0-alpha.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)
+      '@ggui-ai/mcp-server': 0.2.0-alpha.1(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)
       '@ggui-ai/mcp-server-core': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@ggui-ai/mcp-server-handlers': 0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
+      '@ggui-ai/mcp-server-handlers': 0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
       '@ggui-ai/preview-a2ui': 0.2.0-alpha.1
       '@ggui-ai/project-config': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/protocol': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/registry-core': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
+      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
       '@ggui-ai/ui-registry': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@huggingface/transformers': 3.8.1
       '@noble/hashes': 1.8.0
@@ -4622,12 +4645,12 @@ snapshots:
       - react
       - react-dom
 
-  '@ggui-ai/mcp-server-handlers@0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)':
+  '@ggui-ai/mcp-server-handlers@0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)':
     dependencies:
       '@ggui-ai/mcp-server-core': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/negotiator': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/protocol': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
+      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
       '@ggui-ai/ui-registry': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       zod: 4.4.3
     transitivePeerDependencies:
@@ -4643,17 +4666,17 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@ggui-ai/mcp-server@0.2.0-alpha.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)':
+  '@ggui-ai/mcp-server@0.2.0-alpha.1(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)':
     dependencies:
       '@ggui-ai/console': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(zod@4.4.3)
       '@ggui-ai/iframe-runtime': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(zod@4.4.3)
       '@ggui-ai/mcp-server-core': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@ggui-ai/mcp-server-handlers': 0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
+      '@ggui-ai/mcp-server-handlers': 0.2.0-alpha.1(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)(zod@4.4.3)
       '@ggui-ai/negotiator': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/preview-a2ui': 0.2.0-alpha.1
       '@ggui-ai/project-config': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/protocol': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
+      '@ggui-ai/ui-gen': 0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)
       '@ggui-ai/ui-registry': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@modelcontextprotocol/ext-apps': 1.7.2(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.4.3)
@@ -4749,7 +4772,7 @@ snapshots:
 
   '@ggui-ai/shared@0.2.0-alpha.1': {}
 
-  '@ggui-ai/ui-gen@0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)':
+  '@ggui-ai/ui-gen@0.2.0-alpha.1(@ggui-ai/mcp-server-core@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/project-config@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@ggui-ai/protocol@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tslib@2.8.1)(ws@8.21.0)':
     dependencies:
       '@anthropic-ai/bedrock-sdk': 0.29.2(zod@4.4.3)
       '@anthropic-ai/claude-agent-sdk': 0.2.76(zod@4.4.3)
@@ -4760,7 +4783,7 @@ snapshots:
       '@ggui-ai/project-config': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/protocol': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/sandbox': 0.2.0-alpha.1
-      '@ggui-ai/ui-visual-tester': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))
+      '@ggui-ai/ui-visual-tester': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)
       '@ggui-ai/wire': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@google/genai': 1.52.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))
       '@huggingface/transformers': 3.8.1
@@ -4795,13 +4818,15 @@ snapshots:
       - react
       - react-dom
 
-  '@ggui-ai/ui-visual-tester@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))':
+  '@ggui-ai/ui-visual-tester@0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(playwright-core@1.60.0)':
     dependencies:
       '@ggui-ai/design': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/protocol': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ggui-ai/wire': 0.2.0-alpha.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
+    optionalDependencies:
+      playwright-core: 1.60.0
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
 
@@ -5276,6 +5301,10 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.131.0': {}
+
+  '@playwright/test@1.60.0':
+    dependencies:
+      playwright: 1.60.0
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -6611,6 +6640,9 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -7392,6 +7424,14 @@ snapshots:
   pkce-challenge@5.0.1: {}
 
   platform@1.3.6: {}
+
+  playwright-core@1.60.0: {}
+
+  playwright@1.60.0:
+    dependencies:
+      playwright-core: 1.60.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   possible-typed-array-names@1.1.0: {}
 

@@ -198,7 +198,11 @@ function buildHeaders(): Record<string, string> {
 // API call functions
 // ---------------------------------------------------------------------------
 
+// DEMO_FIXTURE=1 → 항상 fixture 사용 (E2E 스모크 테스트용, 네트워크 호출 없음)
+const FORCE_FIXTURE = process.env.DEMO_FIXTURE === '1';
+
 async function fetchJobsFromApi(pageSize = 50): Promise<{ items: RawJob[]; totalItems: number } | null> {
+  if (FORCE_FIXTURE) return null;
   try {
     const url = `${BASE_URL}/api/v1/jobs?pageSize=${pageSize}`;
     const res = await fetchWithTimeout(url, { headers: buildHeaders() });
@@ -211,6 +215,7 @@ async function fetchJobsFromApi(pageSize = 50): Promise<{ items: RawJob[]; total
 }
 
 async function fetchEventsFromApi(): Promise<{ items: RawEvent[]; totalItems: number } | null> {
+  if (FORCE_FIXTURE) return null;
   try {
     const url = `${BASE_URL}/api/v1/events`;
     const res = await fetchWithTimeout(url, { headers: buildHeaders() });

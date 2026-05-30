@@ -23,6 +23,9 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures');
 
+// DEMO_FIXTURE=1 → 항상 fixture 사용 (E2E 스모크 테스트용, 네트워크 호출 없음)
+const FORCE_FIXTURE = process.env.DEMO_FIXTURE === '1';
+
 /** 타임아웃 fetch: 3초 초과 시 AbortError */
 async function fetchWithTimeout(
   url: string,
@@ -173,7 +176,7 @@ async function fetchSwingTaxi(
   const baseUrl = process.env.SWING_BASE_URL ?? 'https://stage.playground.endpoint.swingmobility.dev';
   const apiKey = process.env.SWING_API_KEY ?? '';
 
-  if (apiKey) {
+  if (!FORCE_FIXTURE && apiKey) {
     try {
       const resp = await fetchWithTimeout(
         `${baseUrl}/v1/taxi/eta`,
@@ -238,7 +241,7 @@ async function fetchSwingVehicles(lat: number, lng: number): Promise<SwingVehicl
   const baseUrl = process.env.SWING_BASE_URL ?? 'https://stage.playground.endpoint.swingmobility.dev';
   const apiKey = process.env.SWING_API_KEY ?? '';
 
-  if (apiKey) {
+  if (!FORCE_FIXTURE && apiKey) {
     try {
       const resp = await fetchWithTimeout(
         `${baseUrl}/v1/vehicles/search`,
@@ -285,7 +288,7 @@ async function fetchOdsayTransit(
 ): Promise<OdsayResult> {
   const apiKey = process.env.ODSAY_API_KEY ?? '';
 
-  if (apiKey) {
+  if (!FORCE_FIXTURE && apiKey) {
     try {
       // SX=경도(lng), SY=위도(lat)
       const encodedKey = encodeURIComponent(apiKey);
@@ -362,7 +365,7 @@ async function fetchKmaWeather(
     return { tempC, pop, sky, isRain, condition, source: 'live' };
   };
 
-  if (serviceKey) {
+  if (!FORCE_FIXTURE && serviceKey) {
     try {
       const url =
         `${baseUrl}/getVilageFcst` +
