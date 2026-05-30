@@ -1,21 +1,32 @@
-# secrets — NEVER commit
+node_modules/
+dist/
+.turbo/
+.next/
+build/
+out/
+
+# secrets — never commit
 .env
+.env.local
+.env.*.local
 .env.*
 !.env.example
 
-# deps / build
-node_modules/
-.next/
-dist/
-build/
-out/
+# Playwright artifacts
+/test-results/
+/playwright-report/
+**/playwright-report/
 
 # logs / state
 *.log
 .omc/logs/
-.DS_Store
 
-# fixtures with PII must be scrubbed before commit (see harness 0.7)
+# OS / editor noise
+.DS_Store
+.vscode/
+.idea/
+
+# fixtures with PII must be scrubbed before commit (harness 0.7)
 
 # 내부 기획 문서 — 공개 안 함
 docs/PRD.md

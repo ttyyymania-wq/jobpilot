@@ -1,0 +1,24 @@
+{
+  "name": "@jobpilot/agent-claude-sdk",
+  "version": "0.0.1",
+  "description": "Brand-agnostic Claude Agent SDK backend. Boots an HTTP API (default port 6790) + sandbox-proxy server (default port 7790). Pure backend — no bundled frontend; pair with @ggui-samples/app-ggui-basic-web (or any MCP-Apps-spec frontend) via VITE_AGENT_ENDPOINT_URL. Real LLM via ANTHROPIC_API_KEY. Not published.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.2.76",
+    "@ggui-ai/agent-server": "^0.2.0-alpha.1",
+    "@ggui-ai/protocol": "^0.2.0-alpha.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}
