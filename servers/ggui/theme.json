@@ -1,0 +1,91 @@
+{
+  "$name": "JobPilot",
+  "$description": "JobPilot brand theme — professional navy/blue for career & recruitment, high-contrast dark, urgent/red climax cards pop.",
+  "color": {
+    "primary": {
+      "50":  { "$type": "color", "$value": "#eff6ff" },
+      "100": { "$type": "color", "$value": "#dbeafe" },
+      "200": { "$type": "color", "$value": "#bfdbfe" },
+      "300": { "$type": "color", "$value": "#93c5fd" },
+      "400": { "$type": "color", "$value": "#60a5fa" },
+      "500": { "$type": "color", "$value": "#3b82f6" },
+      "600": { "$type": "color", "$value": "#2563eb" },
+      "700": { "$type": "color", "$value": "#1d4ed8" },
+      "800": { "$type": "color", "$value": "#1e40af" },
+      "900": { "$type": "color", "$value": "#1e3a8a" }
+    },
+    "success": {
+      "500": { "$type": "color", "$value": "#22c55e" },
+      "600": { "$type": "color", "$value": "#16a34a" }
+    },
+    "warning": {
+      "500": { "$type": "color", "$value": "#f59e0b" },
+      "600": { "$type": "color", "$value": "#d97706" }
+    },
+    "error": {
+      "500": { "$type": "color", "$value": "#ef4444" },
+      "600": { "$type": "color", "$value": "#dc2626" }
+    },
+    "info": {
+      "500": { "$type": "color", "$value": "#3b82f6" },
+      "600": { "$type": "color", "$value": "#2563eb" }
+    },
+    "background": { "$type": "color", "$value": "#0d1117" },
+    "surface":    { "$type": "color", "$value": "#161b22" },
+    "onSurface":  { "$type": "color", "$value": "#e6edf3" },
+    "outline":    { "$type": "color", "$value": "#21262d" }
+  },
+  "spacing": {
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" }
+  },
+  "font": {
+    "family": {
+      "sans": { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] },
+      "mono": { "$type": "fontFamily", "$value": ["ui-monospace", "monospace"] }
+    },
+    "size": {
+      "sm": { "$type": "dimension", "$value": "14px" },
+      "md": { "$type": "dimension", "$value": "16px" },
+      "lg": { "$type": "dimension", "$value": "20px" },
+      "xl": { "$type": "dimension", "$value": "28px" }
+    },
+    "weight": {
+      "regular": { "$type": "fontWeight", "$value": 400 },
+      "medium":  { "$type": "fontWeight", "$value": 500 },
+      "bold":    { "$type": "fontWeight", "$value": 700 }
+    },
+    "lineHeight": {
+      "tight":  { "$type": "number", "$value": 1.25 },
+      "normal": { "$type": "number", "$value": 1.5 }
+    }
+  },
+  "shape": {
+    "radius": {
+      "sm":   { "$type": "dimension", "$value": "6px" },
+      "md":   { "$type": "dimension", "$value": "10px" },
+      "lg":   { "$type": "dimension", "$value": "16px" },
+      "full": { "$type": "dimension", "$value": "9999px" }
+    },
+    "shadow": {
+      "sm": { "$type": "shadow", "$value": "0 1px 3px rgba(0,0,0,.2)" },
+      "md": { "$type": "shadow", "$value": "0 4px 16px rgba(0,0,0,.35)" }
+    }
+  },
+  "motion": {
+    "duration": {
+      "fast": { "$type": "duration", "$value": "120ms" },
+      "base": { "$type": "duration", "$value": "200ms" }
+    },
+    "easing": {
+      "standard": { "$type": "cubicBezier", "$value": "cubic-bezier(0.4, 0, 0.2, 1)" }
+    },
+    "transition": {
+      "base": { "$type": "transition", "$value": "all 200ms cubic-bezier(0.4,0,0.2,1)" }
+    }
+  }
+}

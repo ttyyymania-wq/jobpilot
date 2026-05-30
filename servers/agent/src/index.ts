@@ -37,6 +37,7 @@ import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 import type { McpServerConfig } from '@ggui-ai/agent-server';
 import { startServer } from './server.js';
+import { JOBPILOT_SYSTEM_PROMPT } from './jobpilot-prompt.js';
 
 // Walk up looking for the nearest `.env.local`. Picks up the
 // workspace-root one when run via pnpm from this package, and the
@@ -72,7 +73,7 @@ const systemPrompt =
     ? null
     : SYSTEM_PROMPT_ENV !== undefined
       ? SYSTEM_PROMPT_ENV
-      : undefined; // undefined → agent.ts uses DEFAULT_SYSTEM_PROMPT
+      : JOBPILOT_SYSTEM_PROMPT; // env 미설정 시 JobPilot posture 사용
 
 // MCP servers the agent can call into. `ggui` is the one fixed render endpoint
 // (the relay handlers in server.ts forward to it). Every *other* MCP is a
