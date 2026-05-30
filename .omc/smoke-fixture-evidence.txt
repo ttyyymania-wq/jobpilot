@@ -1,0 +1,12 @@
+[WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+$ DEMO_FIXTURE=1 playwright test e2e/demo-smoke.spec.ts
+[WebServer] [43m[33m[[39m[49m[43m[30mWARN[39m[49m[43m[33m][39m[49m The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+[WebServer] [2m$ node scripts/dev.mjs[22m
+
+Running 4 tests using 1 worker
+
+  ✓  1 [chromium] › e2e/demo-smoke.spec.ts:102:7 › US-010 · Demo Smoke (fixture mode) › 턴1: 프론트엔드 공고 검색 → 잡카드 UI 렌더 (1.1m)
+  ✓  2 [chromium] › e2e/demo-smoke.spec.ts:134:7 › US-010 · Demo Smoke (fixture mode) › 턴2: 면접 일정 입력 → 통근/날씨/plan_departure 카드 렌더 (2.3m)
+  ✓  3 [chromium] › e2e/demo-smoke.spec.ts:187:7 › US-010 · Demo Smoke (fixture mode) › 턴3: 캘린더 등록 요청 → gcal 카드 렌더 (2.2m)
+[ELIFECYCLE] Command failed.
+FINAL_EXIT=143

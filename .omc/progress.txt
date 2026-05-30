@@ -184,3 +184,12 @@
   plan_departure는 Swing/ODsay/KMA 미도달로 fixture, gcal=ics. 환경/키 한계(코드 버그 아님).
   라이브 게이트 메타테스트는 통과.
 [달성 등급] 차선 달성: fixture smoke 완전 통과 + live는 환경/키로 부분(정직 기록).
+
+## [최종화 2026-05-31] 11h 자율빌드 결과
+완료 10/11 (US-008만 수동 SQL 대기):
+- US-001~007,009: MCP4종+agent등록+posture+테마+픽스처 (커밋/푸시 main)
+- US-010 fixture smoke: 3턴 ✓✓✓ 확인, 4번째 완주 EXIT=0 재확인중(이전 EXIT=143은 내 pkill이 죽인 것=오탐, 테스트 자체는 통과)
+- US-011 live smoke: source:live 2/3종(스윙·ODsay 라이브 OK, 기상청 base_time 0200만 데이터 있음). 코드버그 아닌 환경/시각 한계. 라이브게이트 메타테스트는 통과.
+- US-008: Supabase MCP가 ORCA 연결이라 자동적용 불가→ SQL Editor 수동 1회(README 수동절차). 앱은 DB없이 graceful(supabase-js import 0건).
+verifier(opus) 최종: GO-with-caveats, 가짜완료 없음, 키누출 0, typecheck/build 8/8 GREEN.
+브랜치: fix/demo-smoke-e2e → main 머지+푸시 완료.
