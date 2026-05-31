@@ -46,33 +46,68 @@ interface ParsedProfile {
 
 interface RocketpunchJob {
   jobId: number;
+  title: string | null;
+  subtitle?: string | null;
+  jobCategory: string | null;
+  seniorities?: string[] | null;
+  employmentTypes?: string[] | null;
+  workType?: string | null;
+  company: {
+    id: string | null;
+    name: string | null;
+    logoUrl?: string | null;
+    industry?: string | null;
+    size?: string | null;
+  } | null;
+  endAt?: string | null;
+  webUrl?: string | null;
+}
+
+// Normalized shape that matches the outputSchema (no nulls)
+interface NormalizedRocketpunchJob {
+  jobId: number;
   title: string;
-  subtitle?: string;
+  subtitle: string;
   jobCategory: string;
-  seniorities?: string[];
-  employmentTypes?: string[];
-  workType?: string;
   company: {
     id: string;
     name: string;
-    logoUrl?: string;
-    industry?: string;
-    size?: string;
+    logoUrl: string;
+    industry: string;
+    size: string;
   };
-  endAt?: string;
-  webUrl?: string;
+  endAt: string;
+  webUrl: string;
 }
 
 interface JobMatch {
-  job: RocketpunchJob;
+  job: NormalizedRocketpunchJob;
   score: number;
   reason: string;
 }
 
-function scoreJob(job: RocketpunchJob, skills: string[], jobCategories: string[]): { score: number; reason: string } {
+function normalizeRocketpunchJob(raw: RocketpunchJob): NormalizedRocketpunchJob {
+  return {
+    jobId: raw.jobId,
+    title: raw.title ?? '',
+    subtitle: raw.subtitle ?? '',
+    jobCategory: raw.jobCategory ?? '',
+    company: {
+      id: raw.company?.id ?? '',
+      name: raw.company?.name ?? '',
+      logoUrl: raw.company?.logoUrl ?? '',
+      industry: raw.company?.industry ?? '',
+      size: raw.company?.size ?? '',
+    },
+    endAt: raw.endAt ?? '',
+    webUrl: raw.webUrl ?? '',
+  };
+}
+
+function scoreJob(job: NormalizedRocketpunchJob, skills: string[], jobCategories: string[]): { score: number; reason: string } {
   const haystack = [
     job.title,
-    job.subtitle ?? '',
+    job.subtitle,
     job.company.name,
     job.jobCategory,
   ]
@@ -243,17 +278,17 @@ export function registerProfileTools(server: McpServer): void {
             job: z.object({
               jobId: z.number(),
               title: z.string(),
-              subtitle: z.string().optional(),
+              subtitle: z.string(),
               jobCategory: z.string(),
               company: z.object({
                 id: z.string(),
                 name: z.string(),
-                logoUrl: z.string().optional(),
-                industry: z.string().optional(),
-                size: z.string().optional(),
+                logoUrl: z.string(),
+                industry: z.string(),
+                size: z.string(),
               }),
-              endAt: z.string().optional(),
-              webUrl: z.string().optional(),
+              endAt: z.string(),
+              webUrl: z.string(),
             }),
             score: z.number(),
             reason: z.string(),
@@ -294,8 +329,9 @@ export function registerProfileTools(server: McpServer): void {
       }
 
       const scored: JobMatch[] = jobs.map((job) => {
-        const { score, reason } = scoreJob(job, skills, jobCategories);
-        return { job, score, reason };
+        const normalized = normalizeRocketpunchJob(job);
+        const { score, reason } = scoreJob(normalized, skills, jobCategories);
+        return { job: normalized, score, reason };
       });
 
       scored.sort((a, b) => b.score - a.score);
