@@ -606,11 +606,66 @@ function renderInlineMarkdown(text: string): ReactNode {
   });
 }
 
+/**
+ * gcal_create_event 결과에서 icsContent를 안전하게 추출한다.
+ * result는 unknown이므로 structuredContent 또는 JSON 파싱 양쪽을 시도.
+ */
+function extractIcsContent(result: unknown): string | null {
+  if (result === undefined || result === null) return null;
+
+  // structuredContent 직접 접근 (ggui SDK가 result에 그대로 넣음)
+  const r = result as Record<string, unknown>;
+  if (typeof r.icsContent === 'string' && r.icsContent.startsWith('BEGIN:VCALENDAR')) {
+    return r.icsContent;
+  }
+
+  // content[0].text에 JSON 문자열로 들어오는 경우 처리
+  const contentArr = r.content;
+  if (Array.isArray(contentArr) && contentArr.length > 0) {
+    const first = contentArr[0] as Record<string, unknown>;
+    if (typeof first.text === 'string') {
+      try {
+        const parsed = JSON.parse(first.text) as Record<string, unknown>;
+        if (typeof parsed.icsContent === 'string' && parsed.icsContent.startsWith('BEGIN:VCALENDAR')) {
+          return parsed.icsContent;
+        }
+      } catch {
+        // 파싱 실패 — 무시
+      }
+    }
+  }
+
+  return null;
+}
+
+function downloadIcs(icsContent: string, summary: string): void {
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  // 파일명: 요약 텍스트를 안전하게 정리
+  const safeName = summary.replace(/[^\w가-힣\s]/g, '').trim().slice(0, 40) || 'event';
+  a.download = `${safeName}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function ToolCallView({ entry }: { entry: ToolCallEntry }) {
   const [open, setOpen] = useState(false);
   const shortName = entry.name.replace(/^mcp__[^_]+__/, '');
   const pending = entry.result === undefined && entry.isError !== true;
   const status = entry.isError ? 'error' : pending ? 'pending' : 'ok';
+
+  // gcal_create_event 결과에서 .ics 다운로드 버튼 표시 여부 결정
+  const isGcalCreate = shortName === 'gcal_create_event';
+  const icsContent = isGcalCreate ? extractIcsContent(entry.result) : null;
+  const inputSummary =
+    isGcalCreate && entry.input !== null && typeof entry.input === 'object'
+      ? ((entry.input as Record<string, unknown>).summary as string | undefined) ?? '면접 일정'
+      : '면접 일정';
+
   return (
     <div className={`msg tool-call tool-call-${status}`}>
       <button
@@ -625,6 +680,20 @@ function ToolCallView({ entry }: { entry: ToolCallEntry }) {
           {pending ? '…' : entry.isError ? 'error' : 'ok'}
         </span>
       </button>
+      {icsContent !== null ? (
+        <div className="ics-download-banner">
+          <button
+            type="button"
+            className="ics-download-btn"
+            onClick={() => downloadIcs(icsContent, inputSummary)}
+          >
+            📅 캘린더에 추가 (.ics 다운로드)
+          </button>
+          <span className="ics-download-hint">
+            다운로드한 파일을 열면 캘린더에 추가됩니다 (맥: 더블클릭 / 구글 캘린더: 설정 &gt; 가져오기)
+          </span>
+        </div>
+      ) : null}
       {open ? (
         <div className="tool-call-body">
           <div className="tool-call-section">

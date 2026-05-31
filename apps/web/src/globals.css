@@ -464,6 +464,48 @@ button {
   background: color-mix(in srgb, var(--fg) 30%, transparent);
 }
 
+/* ─── .ics 다운로드 배너 ──────────────────────────────────────── */
+.ics-download-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.ics-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.15s;
+}
+
+.ics-download-btn:hover {
+  background: var(--jp-blue-600);
+}
+
+.ics-download-btn:active {
+  background: #1d4ed8;
+}
+
+.ics-download-hint {
+  font-size: 11px;
+  color: var(--fg-muted);
+  line-height: 1.45;
+  font-family: var(--ggui-font-family-sans, system-ui, sans-serif);
+}
+
 .msg.render-wrap {
   padding: 0;
   background: transparent;
