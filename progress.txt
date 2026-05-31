@@ -1,0 +1,60 @@
+JobPilot v2 — progress log (다음 이터레이션용 학습 원장)
+
+============================================================
+V2-001 — Next.js 스캐폴드 + 디자인시스템 + AppShell  [DONE, build GREEN]
+============================================================
+
+## 환경
+- node 25.8.1, pnpm 11.2.2. next 16.2.6, react 19.2.4, tailwind v4(@tailwindcss/postcss).
+- 앱 경로: apps/web-next (App Router, no src-dir, alias @/* → ./*).
+
+## shadcn 셋업 — 함정과 해법 (중요)
+- `pnpm dlx shadcn@latest init` 의 `--base-color` 플래그는 4.8.3 에서 제거됨 → "unknown option" 에러.
+- 비대화형(non-TTY)에서 `init --help`/`init -d` 가 "Usage:" 만 무한 반복 출력하며 정상동작 안 함(터미널 없어서 prompt 루프).
+- 결론: **shadcn init 자동화 대신 수동 셋업이 가장 안정적**. 다음처럼 했음:
+  1. 런타임 deps 직접 설치:
+     pnpm add class-variance-authority clsx tailwind-merge lucide-react \
+       tw-animate-css next-themes sonner @radix-ui/react-slot @radix-ui/react-dialog
+  2. components.json 직접 작성 (style: new-york, rsc: true, baseColor neutral,
+     css: app/globals.css, aliases ui=@/components/ui, utils=@/lib/utils ...).
+  3. lib/utils.ts 에 cn() (clsx + tailwind-merge).
+  4. components/ui/*.tsx 직접 작성: button, card, badge, input, skeleton, dialog, sonner.
+     (이후 컴포넌트 추가는 `pnpm dlx shadcn@latest add <name>` 시도하되, 막히면 수동 복붙.)
+- lucide-react 는 1.17.0 설치됨(아이콘 import 정상).
+
+## Tailwind v4 토큰 방식 (CSS-first, tailwind.config.js 없음)
+- globals.css 최상단: `@import "tailwindcss";` + `@import "tw-animate-css";`
+- `@custom-variant dark (&:is(.dark *));` 로 dark variant 정의.
+- 색/반경 토큰은 :root 에 정의 → `@theme inline { --color-*: var(--*) }` 로 매핑해야
+  Tailwind 유틸(bg-jp-bg, text-jp-fg, bg-primary ...)로 노출됨. @theme inline 안 거치면 유틸 생성 안 됨.
+- JobPilot 팔레트 + shadcn semantic(--background/--primary/--border/--ring 등) 둘 다 매핑.
+  radius 14px = --radius: 0.875rem.
+- 다크가 기본: html className="dark" + body bg-jp-bg. .dark 블록도 동일 토큰으로 채워 shadcn 패리티.
+
+## Pretendard
+- CDN <link> (jsdelivr orioncactus/pretendard v1.3.9 variable-dynamic-subset).
+- font-family 이름은 "Pretendard Variable" (CDN 폰트명). --font-sans 에 이걸 첫번째로.
+- next/font 안 씀(CDN으로 충분, 빌드 단순).
+
+## AppShell
+- app/components/AppShell.tsx ("use client" — usePathname/useRouter 필요).
+- 상단바 56px(h-14) sticky + backdrop-blur. 로고→/jobs, 중앙탭(공고/지원현황) 활성시 blue 하단 인디케이터.
+- 모바일은 탭을 헤더 아래 별도 행으로(sm:hidden). 우측 "이력서 업로드" 버튼.
+- 우하단 AI FAB(size-14 원형, bg-jp-blue + .jp-fab-glow) → router.push('/assistant').
+- 랜딩(/)은 AppShell 미사용 풀스크린. 나머지 4개 라우트는 AppShell로 감쌈.
+
+## 라우트 (App Router)
+- /(랜딩, 풀스크린 히어로+channs 크레딧), /jobs, /applications, /interviews/[id], /assistant.
+- placeholder 페이지는 app/components/Placeholder.tsx 공용 컴포넌트로 "준비중" 깔끔하게.
+- /interviews/[id] 는 params 가 Promise (Next15+): `const { id } = await params;`
+
+## 빌드 검증
+- `cd apps/web-next && pnpm build` → EXIT 0, "Compiled successfully".
+- Route 목록에 / · /applications · /interviews/[id](ƒ dynamic) · /assistant · /jobs 전부 잡힘.
+- 기존 apps/web 무변경(tsbuildinfo 외 0). 키스캔 clean.
+- ⚠️ dev 서버 백그라운드 상주 금지(사용자 규칙). 검증은 next build 로만(SSR/타입 다 체크됨).
+
+## 다음(V2-002) 시작점
+- API Route BFF: app/api/_mcp.ts (callMcp: POST {url}/mcp jsonrpc tools/call, SSE/JSON 파싱→structuredContent, 화이트리스트, process.env 키).
+- MCP 포트: rocketpunch/commute/profile/gcal = 6783~6786. 함정은 docs/RALPH-TASK-v2.md §3 그대로.
+- shadcn 컴포넌트 더 필요하면 수동 셋업 패턴 재사용(위 참고).

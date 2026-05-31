@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   JobPilot design tokens — dark-first. Source palette (do not drift):
+   bg #0d1117 · surface #161b22 · card #21262d · outline #30363d
+   fg #e6edf3 · fg-muted #8b949e
+   blue #3b82f6 (primary) · blue-hover #2563eb
+   red #ef4444 (climax) · success #3fb950 · warn #d29922
+--------------------------------------------------------------------------- */
+:root {
+  --jp-bg: #0d1117;
+  --jp-surface: #161b22;
+  --jp-card: #21262d;
+  --jp-outline: #30363d;
+  --jp-fg: #e6edf3;
+  --jp-fg-muted: #8b949e;
+  --jp-blue: #3b82f6;
+  --jp-blue-hover: #2563eb;
+  --jp-red: #ef4444;
+  --jp-success: #3fb950;
+  --jp-warn: #d29922;
+
+  /* shadcn semantic tokens mapped to the JobPilot palette (dark by default) */
+  --radius: 0.875rem; /* 14px card radius */
+  --background: var(--jp-bg);
+  --foreground: var(--jp-fg);
+  --card: var(--jp-card);
+  --card-foreground: var(--jp-fg);
+  --popover: var(--jp-surface);
+  --popover-foreground: var(--jp-fg);
+  --primary: var(--jp-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--jp-surface);
+  --secondary-foreground: var(--jp-fg);
+  --muted: var(--jp-surface);
+  --muted-foreground: var(--jp-fg-muted);
+  --accent: var(--jp-card);
+  --accent-foreground: var(--jp-fg);
+  --destructive: var(--jp-red);
+  --destructive-foreground: #ffffff;
+  --success: var(--jp-success);
+  --warning: var(--jp-warn);
+  --border: var(--jp-outline);
+  --input: var(--jp-outline);
+  --ring: var(--jp-blue);
+}
+
+/* The app is dark by design; .dark shares the same tokens for shadcn parity. */
+.dark {
+  --background: var(--jp-bg);
+  --foreground: var(--jp-fg);
+  --card: var(--jp-card);
+  --card-foreground: var(--jp-fg);
+  --popover: var(--jp-surface);
+  --popover-foreground: var(--jp-fg);
+  --primary: var(--jp-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--jp-surface);
+  --secondary-foreground: var(--jp-fg);
+  --muted: var(--jp-surface);
+  --muted-foreground: var(--jp-fg-muted);
+  --accent: var(--jp-card);
+  --accent-foreground: var(--jp-fg);
+  --destructive: var(--jp-red);
+  --destructive-foreground: #ffffff;
+  --border: var(--jp-outline);
+  --input: var(--jp-outline);
+  --ring: var(--jp-blue);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* JobPilot brand tokens, available as Tailwind utilities (bg-jp-*, text-jp-*) */
+  --color-jp-bg: var(--jp-bg);
+  --color-jp-surface: var(--jp-surface);
+  --color-jp-card: var(--jp-card);
+  --color-jp-outline: var(--jp-outline);
+  --color-jp-fg: var(--jp-fg);
+  --color-jp-fg-muted: var(--jp-fg-muted);
+  --color-jp-blue: var(--jp-blue);
+  --color-jp-blue-hover: var(--jp-blue-hover);
+  --color-jp-red: var(--jp-red);
+  --color-jp-success: var(--jp-success);
+  --color-jp-warn: var(--jp-warn);
+
+  --font-sans: "Pretendard Variable", "Pretendard", system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--jp-bg);
+    color: var(--jp-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background-color: color-mix(in srgb, var(--jp-blue) 35%, transparent);
+  }
+}
+
+@layer utilities {
+  /* AI FAB glow ring */
+  .jp-fab-glow {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--jp-blue) 40%, transparent),
+      0 8px 24px -4px color-mix(in srgb, var(--jp-blue) 55%, transparent),
+      0 0 40px -8px color-mix(in srgb, var(--jp-blue) 70%, transparent);
+  }
+  .jp-fab-glow:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--jp-blue) 60%, transparent),
+      0 10px 30px -4px color-mix(in srgb, var(--jp-blue) 70%, transparent),
+      0 0 56px -8px color-mix(in srgb, var(--jp-blue) 85%, transparent);
+  }
+}

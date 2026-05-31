@@ -1,146 +1,99 @@
 {
-  "title": "JobPilot — GGUI 생성형 UI 채용 에이전트",
-  "description": "대화하면 UI가 생성되는 채용 에이전트. 공고매칭→지원추적→면접→통근+날씨 선제제안→캘린더. 검증된 API 함정은 docs/RALPH-TASK.md §2 준수. UI코드 안 짜고 MCP 도구+시스템프롬프트만 작성(GGUI 원리).",
+  "title": "JobPilot v2 — Next.js 채용 웹서비스 (UI 최우선)",
+  "description": "GGUI 채팅 셸 → 진짜 쓸 수 있는 Next.js 채용 서비스. apps/web-next 신규(기존 apps/web 보존). 공고/통근/날씨=API Route가 MCP직접호출, 어시스턴트만 LLM. UI 품질이 최우선 평가기준(토스/원티드 수준). 검증된 API 함정은 docs/RALPH-TASK-v2.md §3. 제작 channs 단독. (v1 11개 스토리는 .omc/prd-v1-ggui.json.bak에 완료 보존)",
   "stories": [
     {
-      "id": "US-001",
-      "title": "API 실응답 픽스처 캡처",
+      "id": "V2-001",
+      "title": "Next.js 스캐폴드 + 디자인시스템 + AppShell",
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "fixtures/rocketpunch.jobs.json 존재 — /api/v1/jobs 실응답(items 배열, jobId/title/company 필드 포함) 캡처됨",
-        "fixtures/swing.taxi.json + fixtures/swing.vehicles.json 존재 — distance/spendTime/taxiFare, vehicles 배열 포함",
-        "fixtures/odsay.path.json 존재 — result.path[].info.totalTime 포함",
-        "fixtures/kma.forecast.json 존재 — POP/TMP/SKY 카테고리 포함, 그리고 fixtures/kma.rainy.json(강수확률 높은 데모용) 존재",
-        "모든 픽스처에 PII/키 없음 (grep으로 sk-/sb_secret/이메일 0건)"
+        "apps/web-next/ 존재 — Next.js App Router + TypeScript + Tailwind, pnpm-workspace에 등록, 기존 apps/web은 무수정 보존(git diff로 apps/web 변경 0 확인)",
+        "shadcn/ui 초기화 + lucide-react. 다크 디자인토큰: --jp-bg #0d1117, surface #161b22, card #21262d, blue-500 #3b82f6, error #ef4444, success #3fb950 적용",
+        "AppShell: 상단바(로고+탭 공고/지원현황+이력서업로드) + 우하단 AI FAB, 다크테마 일관",
+        "라우트 골격: /, /jobs, /applications, /interviews/[id], /assistant (빈 페이지라도)",
+        "next build 통과(에러 0), 포트 3000 기동 가능, 기존 apps/web(6890) 무영향"
       ]
     },
     {
-      "id": "US-002",
-      "title": "rocketpunch MCP 서버",
+      "id": "V2-002",
+      "title": "API Route BFF — MCP 직접 호출 (LLM 우회)",
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "servers/mcps/rocketpunch/ 존재, package.json name=@jobpilot/mcp-rocketpunch, PORT 6783",
-        "도구 search_jobs(query,filters) 구현 — /api/v1/jobs로 전체 받아 클라이언트 keyword 필터(로켓펀치 keyword 0건 함정 회피), 헤더 X-OBA-API-Key, process.env 참조",
-        "도구 get_job(jobId), search_events(query) 구현",
-        "라이브 실패 시 fixtures/rocketpunch.jobs.json fallback + 응답에 source:live|fixture 플래그",
-        "pnpm --filter @jobpilot/mcp-rocketpunch typecheck 통과",
-        "서버 기동 후 search_jobs 호출 시 실제 공고 ≥1건 반환(source:live 로그)"
+        "app/api/_mcp.ts: callMcp(server,tool,args) — POST {url}/mcp jsonrpc tools/call, SSE/JSON 파싱→structuredContent, 화이트리스트, process.env 키(평문 금지)",
+        "/api/jobs(rocketpunch.search_jobs+로컬필터), /api/match, /api/commute(get_commute+plan_departure), /api/weather, /api/resume, /api/geocode, /api/calendar 라우트",
+        "타임아웃+graceful(throw로 라우트 안죽임), source 플래그 보존",
+        "실측: /api/jobs 호출시 로켓펀치 라이브 공고 ≥1건 JSON 반환(source:live)",
+        "build+typecheck 통과"
       ]
     },
     {
-      "id": "US-003",
-      "title": "commute MCP 서버 (스윙+ODsay+기상청)",
+      "id": "V2-003",
+      "title": "공고 대시보드 (/jobs) — UI 최우선",
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "servers/mcps/commute/ 존재, PORT 6784",
-        "get_commute(origin,destination,arrivalTime) — 스윙 taxi/eta(spendTime 초→분 변환) + ODsay(키 URL인코딩, SX=경도/SY=위도) 통합, 멀티모달 비교 반환",
-        "get_weather(location,datetime) — 기상청 getVilageFcst(위경도→nx/ny 격자변환 구현), POP/TMP/SKY 파싱",
-        "plan_departure(origin,destination,arrivalTime) — commute+weather 호출, 강수확률·혼잡 기반 출발시각 버퍼 계산, reason 문자열 반환",
-        "각 외부호출 타임아웃+fixture fallback+source 플래그, ODsay IP차단 시 fixture로 graceful",
-        "typecheck 통과, get_commute 실호출 시 택시 spendTime 분 단위로 반환(source:live)"
+        "이력서 드롭존(PDF/txt/md→/api/resume, pdfjs 로컬워커, sanitize)+스킬칩",
+        "공고 그리드: JobCard(로고/제목/MatchScoreBadge 수치+라벨+색/태그/지원/💬AI), 반응형 3→2→1열",
+        "SearchBar(디바운스)+FilterChips(직무/지역/경력/재택)",
+        "지원하기→Supabase insert(or 로컬폴백)→토스트, 낙관적",
+        "상태 3종 디자인됨: 스켈레톤shimmer/빈/에러+재시도 (흰화면 금지)",
+        "UI 자평: 스크린샷 정렬·대비·여백·일관성 프로페셔널, build 통과"
       ]
     },
     {
-      "id": "US-004",
-      "title": "profile MCP 서버 (이력서 파싱)",
+      "id": "V2-004",
+      "title": "면접+통근 상세 (/interviews/[id]) — 데모 클라이맥스, UI 최고",
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "servers/mcps/profile/ 존재, PORT 6785",
-        "parse_resume(fileUrl|text) — Claude(haiku)로 PDF/텍스트→{name,skills[],years,jobCategories[]} 구조화 추출",
-        "match_jobs(profile) — profile 기반 rocketpunch 호출하여 점수순 매칭",
-        "typecheck 통과, parse_resume에 샘플 이력서 텍스트 입력 시 skills 배열 반환"
+        "헤더카드(회사/일시/장소/D-day)+캘린더(구글 render URL+.ics 다운로드)",
+        "⭐출발권장 배너: --jp-error 펄스 등장, 데이터 준비후 렌더(빈깜빡임 방지), 시각 1순위",
+        "통근 멀티모달 카드3(택시/지하철/킥보드): /api/commute, 추천 ⭐+blue테두리, spendTime 분",
+        "날씨 위젯: /api/weather POP/기온/조언, 비예보시 배너 연동",
+        "진입시 commute+weather+plan_departure 자동(무클릭연쇄), geocode로 회사위치 자동(되묻지않음), 집주소 없으면 1회입력",
+        "UI 자평: 가장 공들인 수준, 모바일 배너 sticky, build 통과"
       ]
     },
     {
-      "id": "US-005",
-      "title": "gcal MCP 서버 (구글 캘린더)",
+      "id": "V2-005",
+      "title": "랜딩 (/) + channs 크레딧",
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "servers/mcps/gcal/ 존재, PORT 6786",
-        "get_oauth_url(redirectUri) — Google OAuth 동의 URL 생성",
-        "create_event(summary,location,start,end,description,reminders) — Calendar events.insert 호출",
-        "토큰 만료/없음 시 .ics 파일 생성 fallback (harness M3), source 플래그",
-        "typecheck 통과"
+        "히어로(헤드라인+이력서 드롭 CTA+공고둘러보기), 그라데이션/모션 프로페셔널",
+        "기능카드4(매칭/추적/통근+날씨/캘린더)+작동흐름 스텝(검색→지원→면접→통근)",
+        "푸터 'Made by channs · JobPilot 솔로 빌드' + README 상단 'built solo by channs'",
+        "CTA 이력서 드롭→파싱→/jobs 이동",
+        "UI 자평 + build 통과"
       ]
     },
     {
-      "id": "US-006",
-      "title": "4개 MCP를 agent에 등록 + dev 스크립트",
+      "id": "V2-006",
+      "title": "어시스턴트 (/assistant+FAB) — GGUI 이식 + 생성형 한 방",
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        ".env.local에 GGUI_ROCKETPUNCH_MCP_URL/GGUI_COMMUTE_MCP_URL/GGUI_PROFILE_MCP_URL/GGUI_GCAL_MCP_URL 4개 추가(localhost:6783~6786)",
-        "servers/agent/src/agent.ts DEFAULT_ALLOWED_TOOLS에 rocketpunch/commute/profile/gcal 4개 도구 prefix 등록",
-        "package.json에 dev:mcps가 4개 새 MCP 포함(servers/mcps/* 패턴이 자동 포함하는지 확인)",
-        "pnpm typecheck 전체 통과, pnpm build 전체 통과"
+        "기존 apps/web Chat(agent SSE+AppRenderer+sandboxUrl) Next.js 이식: 'use client'+dynamic(ssr:false), iframe 정상 마운트",
+        "FAB→우측 슬라이드 패널(420px, 모바일 풀스크린) 어시스턴트 동작",
+        "GGUI 트랙 방어: '토스랑 당근 비교해줘' 류 발화시 정적UI엔 없는 비교/분석 화면 실시간 생성(생성형 UI 시연)",
+        "어시스턴트 인사 'by channs' 포함",
+        "build 통과 + 어시스턴트 실제 응답 1회 확인(채팅→agent→렌더)"
       ]
     },
     {
-      "id": "US-007",
-      "title": "agent 시스템 프롬프트 = 채용 에이전트 posture",
+      "id": "V2-007",
+      "title": "지원 칸반 (/applications) + Supabase [Should]",
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "SYSTEM_PROMPT(또는 코드 상수)에 JobPilot 채용 posture: 이력서→공고매칭→지원추적→면접일정→통근+날씨 선제제안→캘린더",
-        "면접 일정 등록 직후 plan_departure를 사용자 요청 없이 자동 호출하라는 지시 포함",
-        "active_application_id 멀티턴 컨텍스트 유지 지시(이거/그 회사 지시어 해석)",
-        "프롬프트는 posture만, ggui 와이어플로우 재설명 안 함(CLAUDE.md 규칙)"
+        "4컬럼(지원중/서류합격/면접/최종) @dnd-kit DnD+키보드 접근성",
+        "ApplicationCard(회사/직무/지원일 or D-day), 면접컬럼 일정+통근보기 링크",
+        "Supabase 실연동(신형 anon키 apikey헤더, 익명Auth+RLS or 데모user_id), 드래그→status 영속. 안되면 로컬폴백+사유",
+        "빈상태(전체/컬럼) 디자인됨",
+        "UI 자평 + build 통과"
       ]
-    },
-    {
-      "id": "US-008",
-      "title": "Supabase 스키마 마이그레이션",
-      "priority": 8,
-      "passes": true,
-      "acceptanceCriteria": [
-        "supabase/migrations/0001_init.sql 존재 — profiles/applications/interviews/commute_cache 4테이블, IF NOT EXISTS, 재실행 안전",
-        "applications.status enum(applied/doc_passed/interview/final/rejected) 체크제약",
-        "supabase MCP로 jobpilot 프로젝트(cacrjgioedkwxqhxiqbn)에 마이그레이션 적용됨 — list_tables로 4테이블 확인",
-        "profile/applications 쓰기를 하는 코드가 anon키는 apikey헤더만 사용(신형키 함정)"
-      ],
-      "notes": "PASS 2026-05-31: 사용자가 Supabase SQL Editor(jobpilot 프로젝트 cacrjgioedkwxqhxiqbn)에서 0001_init.sql 실행, Table Editor에서 profiles/applications/interviews/commute_cache 4테이블 확인."
-    },
-    {
-      "id": "US-009",
-      "title": "ggui 테마 = JobPilot 브랜드",
-      "priority": 9,
-      "passes": true,
-      "acceptanceCriteria": [
-        "servers/ggui/ggui.json app.slug=jobpilot, app.name=JobPilot, generation.model=claude-haiku-4-5",
-        "theme 설정(채용 도메인 적합, 클라이맥스 카드 강조 가능한 팔레트)",
-        "ggui.json 유효 JSON, pnpm dev:ggui 기동 에러 없음"
-      ]
-    },
-    {
-      "id": "US-010",
-      "title": "demo-smoke (기내모드, Playwright)",
-      "priority": 10,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Playwright 설치, e2e/demo-smoke.spec.ts 존재",
-        "fallback 강제(네트워크 차단/fixture 모드)에서 데모 3턴 재생: 공고검색→면접등록→통근+날씨카드→캘린더, 각 턴 기대 UI assert",
-        "콘솔 에러 0 assert",
-        "pnpm demo-smoke 실행 시 통과(종료코드 0)"
-      ],
-      "notes": "PASS 확정 2026-05-31: DEMO_FIXTURE=1 pnpm demo-smoke = 4 passed (7.3m), 자연완주 EXIT=0. 증거 .omc/smoke-fixture-evidence.txt. (이전 EXIT=143은 후속 pkill이 teardown 중 프로세스를 죽인 오탐, 테스트 자체는 통과)"
-    },
-    {
-      "id": "US-011",
-      "title": "demo-smoke:live (라이브 게이트, 가짜완료 방지)",
-      "priority": 11,
-      "passes": true,
-      "acceptanceCriteria": [
-        "e2e/demo-smoke-live.spec.ts 존재 — fallback 비활성, 네트워크 ON",
-        "라이브 도구 ≥3종(rocketpunch/commute/gcal 중)이 source:live 로그를 남기며 통과",
-        "pnpm demo-smoke:live 실행 시 통과(종료코드 0)",
-        "이 게이트는 fixture로 통과 불가(harness 0.2/0.3 라이브게이트)"
-      ],
-      "notes": "PASS 2026-05-31: 근본원인=package.json dev:mcps에 dotenv -e .env.local 누락(ggui/agent엔 있는데 mcps만 빠짐)→MCP들이 키 없이 떠서 전부 fixture였음. 수정 후 라이브 재시작하여 실측: rocketpunch search_jobs=live, commute get_commute=live(택시+대중교통 2개), commute get_weather=live. source:live ≥3종 충족(라이브게이트 통과). gcal은 OAuth 토큰 없어 .ics(정상경로)."
     }
   ]
 }
