@@ -32,7 +32,7 @@
       "id": "V2-003",
       "title": "공고 대시보드 (/jobs) — UI 최우선",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "이력서 드롭존(PDF/txt/md→/api/resume, pdfjs 로컬워커, sanitize)+스킬칩",
         "공고 그리드: JobCard(로고/제목/MatchScoreBadge 수치+라벨+색/태그/지원/💬AI), 반응형 3→2→1열",

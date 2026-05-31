@@ -114,3 +114,21 @@ V2-002 — API Route BFF — MCP HTTP 브릿지  [DONE, build GREEN, 실측 PASS
 - 프론트엔드 /jobs 페이지에서 /api/jobs를 fetch해 실제 데이터 렌더링.
 - 이력서 PDF 업로드: 프론트에서 텍스트 추출 후 POST /api/resume {text}.
 - Supabase 연동: NEXT_PUBLIC_SUPABASE_URL/ANON 키 추가 필요.
+
+## V2-003 공고 대시보드 (/jobs) — 2026-05-31
+
+구현 완료 (build 통과, /jobs HTTP 200 실측):
+- app/jobs/page.tsx: 좌측 사이드(320px) + 우측 공고 그리드 레이아웃. 검색/매칭 모드, 클라이언트 필터, 상태 4종 관리.
+- app/jobs/components/ResumeDropzone.tsx: PDF/txt/md 드래그&드롭. pdfjs 로컬워커로 추출→sanitize→POST /api/resume→스킬칩. 로딩 스피너.
+- app/jobs/components/SearchBar.tsx: 300ms 디바운스 GET /api/jobs?q=. 좌측 🔎 + 클리어.
+- app/jobs/components/FilterChips.tsx: 직무/근무형태 토글칩(클라이언트 필터).
+- app/jobs/components/JobCard.tsx: 로고(없으면 이니셜), 제목/회사, MatchScoreBadge, 태그칩, 지원하기(낙관적 토글+토스트)/AI(→/assistant). hover 떠오름.
+- app/jobs/components/MatchScoreBadge.tsx: ≥80 success / 50-79 warn / 그외 muted, ●도트+점수+라벨.
+- app/jobs/components/JobStates.tsx: 스켈레톤(6카드 shimmer)/빈상태/결과없음/에러배너+재시도.
+- lib/resume.ts: apps/web Chat.tsx의 extractPdfText/sanitizeResumeText 이식. Next.js용 워커 URL = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).
+- lib/jobs.ts: Job/Match/Resume 타입 + jobToCard/matchesToCards(raw score→최고점 대비 0-100 정규화)/카테고리·근무형태 한글 라벨.
+- pdfjs-dist ^5.4.149 추가.
+
+흐름: 이력서 업로드→PDF 텍스트 추출→/api/resume 파싱→skills 칩 표시→자동 /api/match→매칭 카드(점수순). 검색바는 /api/jobs로 전체 공고 탐색.
+
+검증: next build EXIT 0 (13 static pages). next start :3099 → /jobs HTTP 200, SSR HTML에 드롭존/빈상태 카피 포함 확인 후 종료. 흰화면 없음.
