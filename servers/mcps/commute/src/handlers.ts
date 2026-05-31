@@ -398,10 +398,134 @@ async function fetchKmaWeather(
 }
 
 // ---------------------------------------------------------------------------
+// 지오코딩 (회사명/지역명/주소 → 좌표) — OpenStreetMap Nominatim
+// 무료 · 키 불필요 · rate limit 1req/s. User-Agent 헤더 필수.
+// 실패 시 서울시청 폴백, throw 금지.
+// ---------------------------------------------------------------------------
+
+const SEOUL_CITY_HALL = { lat: 37.5666, lng: 126.9784 };
+
+interface GeocodeResult {
+  [k: string]: unknown;
+  query: string;
+  lat: number;
+  lng: number;
+  displayName: string;
+  source: 'live' | 'fixture';
+  matched: boolean;
+}
+
+async function geocodePlace(query: string): Promise<GeocodeResult> {
+  const fallback: GeocodeResult = {
+    query,
+    lat: SEOUL_CITY_HALL.lat,
+    lng: SEOUL_CITY_HALL.lng,
+    displayName: '서울특별시청 (폴백)',
+    source: 'fixture',
+    matched: false,
+  };
+
+  if (FORCE_FIXTURE) return fallback;
+
+  try {
+    const url =
+      `https://nominatim.openstreetmap.org/search` +
+      `?q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=kr`;
+    const resp = await fetchWithTimeout(
+      url,
+      { method: 'GET', headers: { 'User-Agent': 'JobPilot/1.0' } },
+      3000,
+    );
+    if (resp.ok) {
+      const data = (await resp.json()) as Array<{
+        lat?: string;
+        lon?: string;
+        display_name?: string;
+      }>;
+      const hit = data[0];
+      if (hit?.lat && hit?.lon) {
+        const lat = Number(hit.lat);
+        const lng = Number(hit.lon);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return {
+            query,
+            lat,
+            lng,
+            displayName: hit.display_name ?? query,
+            source: 'live',
+            matched: true,
+          };
+        }
+      }
+    }
+  } catch {
+    // fallthrough to fallback
+  }
+
+  return fallback;
+}
+
+/**
+ * 좌표 또는 장소명에서 좌표를 해석. 좌표가 모두 주어지면 그대로 사용,
+ * 없고 장소명이 있으면 geocode. 둘 다 없으면 서울시청 폴백.
+ */
+async function resolveCoords(
+  lat: number | undefined,
+  lng: number | undefined,
+  place: string | undefined,
+): Promise<{ lat: number; lng: number }> {
+  if (typeof lat === 'number' && typeof lng === 'number') {
+    return { lat, lng };
+  }
+  if (place && place.trim().length > 0) {
+    const geo = await geocodePlace(place);
+    return { lat: geo.lat, lng: geo.lng };
+  }
+  return { lat: SEOUL_CITY_HALL.lat, lng: SEOUL_CITY_HALL.lng };
+}
+
+// ---------------------------------------------------------------------------
 // 도구 등록
 // ---------------------------------------------------------------------------
 
 export function registerCommuteTools(server: McpServer): void {
+  // -------------------------------------------------------------------
+  // geocode_place — 회사명/지역명/주소 → 좌표
+  // -------------------------------------------------------------------
+  server.registerTool(
+    'geocode_place',
+    {
+      title: 'Geocode · 장소명 → 좌표',
+      description:
+        '회사명·지역명·주소 문자열을 위경도 좌표로 변환합니다. ' +
+        '면접 장소나 회사 위치를 알 때 사용자에게 좌표를 되묻지 말고 이 도구로 먼저 좌표를 구한 뒤 ' +
+        'get_commute / get_weather / plan_departure를 호출하세요. ' +
+        '예: query="강남역", "토스 본사", "판교 카카오". 한국 내 장소를 우선 검색합니다. ' +
+        '매칭 실패 시 matched=false와 함께 서울시청 좌표를 폴백으로 반환합니다.',
+      inputSchema: {
+        query: z
+          .string()
+          .min(1)
+          .describe('회사명·지역명·주소 문자열 (예: "강남역", "토스 본사")'),
+      },
+      outputSchema: {
+        query: z.string(),
+        lat: z.number(),
+        lng: z.number(),
+        displayName: z.string(),
+        source: z.enum(['live', 'fixture']),
+        matched: z.boolean(),
+      },
+    },
+    async (input) => {
+      const result = await geocodePlace(String(input.query));
+      return {
+        structuredContent: result,
+        content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+      };
+    },
+  );
+
   // -------------------------------------------------------------------
   // get_commute
   // -------------------------------------------------------------------
@@ -414,10 +538,18 @@ export function registerCommuteTools(server: McpServer): void {
         '각 수단의 소요시간(분)·요금을 반환하고 최적 수단을 추천합니다. ' +
         '소요시간이 가장 중요한 경우 택시, 비용이 중요하면 대중교통을 추천합니다.',
       inputSchema: {
-        originLat: z.number().describe('출발지 위도 (예: 37.4979)'),
-        originLng: z.number().describe('출발지 경도 (예: 127.0276)'),
-        destLat: z.number().describe('목적지 위도'),
-        destLng: z.number().describe('목적지 경도'),
+        originLat: z.number().optional().describe('출발지 위도 (예: 37.4979). originPlace 대신 좌표를 직접 줄 때 사용.'),
+        originLng: z.number().optional().describe('출발지 경도 (예: 127.0276)'),
+        destLat: z.number().optional().describe('목적지 위도'),
+        destLng: z.number().optional().describe('목적지 경도'),
+        originPlace: z
+          .string()
+          .optional()
+          .describe('출발지 장소명 (예: "강남역"). 좌표가 없으면 내부에서 지오코딩합니다.'),
+        destPlace: z
+          .string()
+          .optional()
+          .describe('목적지 장소명 (예: "토스 본사"). 좌표가 없으면 내부에서 지오코딩합니다.'),
         arrivalTime: z
           .string()
           .optional()
@@ -452,7 +584,12 @@ export function registerCommuteTools(server: McpServer): void {
       },
     },
     async (input) => {
-      const { originLat, originLng, destLat, destLng } = input;
+      const origin = await resolveCoords(input.originLat, input.originLng, input.originPlace);
+      const dest = await resolveCoords(input.destLat, input.destLng, input.destPlace);
+      const originLat = origin.lat;
+      const originLng = origin.lng;
+      const destLat = dest.lat;
+      const destLng = dest.lng;
 
       // 세 호출을 병렬로
       const [taxiResult, vehiclesResult, odsayResult] = await Promise.all([
@@ -515,8 +652,12 @@ export function registerCommuteTools(server: McpServer): void {
         '위경도로 기상청 단기예보를 조회합니다. 기온(°C), 강수확률(%), 하늘상태, 강수여부를 반환합니다. ' +
         '통근 계획 시 날씨 버퍼를 추가할지 판단하는 데 사용합니다.',
       inputSchema: {
-        lat: z.number().describe('위도 (예: 37.4979)'),
-        lng: z.number().describe('경도 (예: 127.0276)'),
+        lat: z.number().optional().describe('위도 (예: 37.4979). place 대신 좌표를 직접 줄 때 사용.'),
+        lng: z.number().optional().describe('경도 (예: 127.0276)'),
+        place: z
+          .string()
+          .optional()
+          .describe('장소명 (예: "판교"). 좌표가 없으면 내부에서 지오코딩합니다.'),
         datetime: z
           .string()
           .optional()
@@ -534,7 +675,8 @@ export function registerCommuteTools(server: McpServer): void {
       },
     },
     async (input) => {
-      const { lat, lng, datetime } = input;
+      const { datetime } = input;
+      const { lat, lng } = await resolveCoords(input.lat, input.lng, input.place);
       const dt = datetime ? new Date(datetime) : undefined;
       const { nx, ny } = latLngToGrid(lat, lng);
       const weather = await fetchKmaWeather(lat, lng, dt);

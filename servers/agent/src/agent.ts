@@ -152,6 +152,7 @@ const DEFAULT_ALLOWED_TOOLS: Record<string, ReadonlyArray<string>> = {
     'mcp__rocketpunch__search_events',
   ],
   commute: [
+    'mcp__commute__geocode_place',
     'mcp__commute__get_commute',
     'mcp__commute__get_weather',
     'mcp__commute__plan_departure',

@@ -638,6 +638,53 @@ function extractIcsContent(result: unknown): string | null {
   return null;
 }
 
+/**
+ * .ics 콘텐츠에서 단일 라인 값을 추출 (DTSTART/DTEND/SUMMARY/LOCATION 등).
+ * RFC 5545 라인은 CRLF 구분 + `KEY:VALUE` 또는 `KEY;PARAM=...:VALUE` 형태.
+ */
+function icsLineValue(ics: string, key: string): string | null {
+  const re = new RegExp(`^${key}(?:;[^:]*)?:(.*)$`, 'm');
+  const m = re.exec(ics);
+  return m ? m[1].replace(/\r$/, '').trim() : null;
+}
+
+/** .ics 이스케이프 해제 (\\, \; \, \n). */
+function unescapeIcs(text: string): string {
+  return text
+    .replace(/\\n/g, '\n')
+    .replace(/\\,/g, ',')
+    .replace(/\\;/g, ';')
+    .replace(/\\\\/g, '\\');
+}
+
+/**
+ * gcal_create_event 결과(또는 .ics)에서 구글 캘린더 이벤트 생성 URL을 만든다.
+ * .ics의 DTSTART/DTEND는 이미 UTC(YYYYMMDDTHHMMSSZ) 형식이라 그대로 사용.
+ * 추출 실패 시 null.
+ */
+function buildGoogleCalendarUrl(icsContent: string): string | null {
+  const start = icsLineValue(icsContent, 'DTSTART');
+  const end = icsLineValue(icsContent, 'DTEND');
+  if (!start || !end) return null;
+  const summary = unescapeIcs(icsLineValue(icsContent, 'SUMMARY') ?? '면접 일정');
+  const location = unescapeIcs(icsLineValue(icsContent, 'LOCATION') ?? '');
+  const details = unescapeIcs(icsLineValue(icsContent, 'DESCRIPTION') ?? '');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: summary,
+    dates: `${start}/${end}`,
+  });
+  if (location) params.set('location', location);
+  if (details) params.set('details', details);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function openGoogleCalendar(icsContent: string): void {
+  const url = buildGoogleCalendarUrl(icsContent);
+  if (url) window.open(url, '_blank');
+}
+
 function downloadIcs(icsContent: string, summary: string): void {
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -685,12 +732,19 @@ function ToolCallView({ entry }: { entry: ToolCallEntry }) {
           <button
             type="button"
             className="ics-download-btn"
+            onClick={() => openGoogleCalendar(icsContent)}
+          >
+            📅 Google 캘린더에 추가
+          </button>
+          <button
+            type="button"
+            className="ics-download-btn"
             onClick={() => downloadIcs(icsContent, inputSummary)}
           >
-            📅 캘린더에 추가 (.ics 다운로드)
+            .ics 다운로드 (애플/아웃룩)
           </button>
           <span className="ics-download-hint">
-            다운로드한 파일을 열면 캘린더에 추가됩니다 (맥: 더블클릭 / 구글 캘린더: 설정 &gt; 가져오기)
+            Google 캘린더가 새 탭으로 열리면 "저장"만 누르면 등록됩니다. 애플/아웃룩은 .ics 파일을 여세요.
           </span>
         </div>
       ) : null}
