@@ -578,6 +578,18 @@ form.drag-over {
   color: var(--error);
 }
 
+.resume-attachment-chip {
+  display: block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+  cursor: default;
+}
+
 .upload-spinner {
   display: inline-block;
   width: 12px;

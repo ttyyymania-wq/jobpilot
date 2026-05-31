@@ -66,6 +66,38 @@ async function extractFileText(file: File): Promise<string | null> {
 }
 
 /**
+ * 이력서 추출 텍스트에서 노이즈 라인을 제거한다.
+ * - `file://` URL 라인 (PDF 렌더링 아티팩트)
+ * - `YY. M. D. 오전/오후 H:MM` 형태의 날짜/시간 라인
+ * - `숫자/숫자` 형태의 페이지번호 단독 라인
+ * - 3줄 이상 연속 빈 줄을 2줄로 압축
+ */
+function sanitizeResumeText(raw: string): string {
+  return raw
+    .split('\n')
+    .filter((line) => {
+      const t = line.trim();
+      // file:// URL 라인
+      if (/^file:\/\//i.test(t)) return false;
+      // 날짜 라인: "26. 5. 31. 오전 9:46" 등
+      if (/^\d{2,4}\.\s*\d{1,2}\.\s*\d{1,2}\.\s*(오전|오후)\s*\d{1,2}:\d{2}/.test(t)) return false;
+      // 페이지번호 단독 라인: "1/1", "2/5" 등
+      if (/^\d+\/\d+$/.test(t)) return false;
+      return true;
+    })
+    .join('\n')
+    // 연속 빈 줄 3개 이상 → 2개로 압축
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/**
+ * 이력서 첨부 마커 — 사용자가 직접 입력할 수 없는 토큰.
+ * 이 마커 이후의 내용은 화면에서 숨기고 에이전트에게만 전달된다.
+ */
+const RESUME_ATTACHMENT_MARKER = '\n\n⟦RESUME_ATTACHMENT⟧\n';
+
+/**
  * The hook's drop-in `<AppRenderer onMessage>` handler. The sample
  * stays ggui-protocol-agnostic for the `ui/message` path — it forwards
  * the guest message verbatim through this handler; the agent-server
@@ -287,13 +319,16 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
         setUploadMsg('텍스트를 추출할 수 없었습니다. 텍스트로 붙여넣어 주세요.');
         return;
       }
-      let body = text.trim();
+      let body = sanitizeResumeText(text);
       let truncated = false;
       if (body.length > MAX_RESUME_CHARS) {
         body = body.slice(0, MAX_RESUME_CHARS);
         truncated = true;
       }
-      const message = `다음은 제 이력서입니다. 분석해서 맞는 공고를 찾아주세요:\n\n${body}${truncated ? '\n\n(※ 이력서가 너무 길어 앞부분만 전송됐습니다.)' : ''}`;
+      // 사용자 버블에는 짧은 라벨만 보이고, 에이전트에겐 마커 뒤 전문이 전달된다.
+      const displayLabel = `📎 ${file.name} 분석 요청`;
+      const agentPayload = `다음은 제 이력서입니다. 분석해서 맞는 공고를 찾아주세요:\n\n${body}${truncated ? '\n\n(※ 이력서가 너무 길어 앞부분만 전송됐습니다.)' : ''}`;
+      const message = `${displayLabel}${RESUME_ATTACHMENT_MARKER}${agentPayload}`;
       setUploadState('done');
       setUploadMsg(truncated ? '이력서가 길어 앞부분만 전송됩니다.' : '');
       void send(message);
@@ -585,6 +620,22 @@ function ChatEntryView({
   }
   if (entry.kind === 'tool-call') {
     return <ToolCallView entry={entry} />;
+  }
+  // user 메시지: 마커 이후 이력서 본문은 숨기고 첨부 칩만 표시한다.
+  if (entry.kind === 'user') {
+    const markerIdx = entry.text.indexOf('⟦RESUME_ATTACHMENT⟧');
+    if (markerIdx !== -1) {
+      const displayText = entry.text.slice(0, markerIdx).trim();
+      const bodyLength = entry.text.length - markerIdx - '⟦RESUME_ATTACHMENT⟧'.length;
+      return (
+        <div className="msg user">
+          <span>{displayText}</span>
+          <span className="resume-attachment-chip" title={`이력서 본문 ${bodyLength.toLocaleString()}자 첨부됨 (에이전트에게 전달)`}>
+            📄 이력서 본문 {Math.round(bodyLength / 100) * 100}자 첨부됨
+          </span>
+        </div>
+      );
+    }
   }
   return (
     <div className={`msg ${entry.kind}`}>{renderInlineMarkdown(entry.text)}</div>
