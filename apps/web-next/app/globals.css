@@ -134,6 +134,120 @@
 }
 
 @layer utilities {
+  /* Landing entrance motion — fade + rise. Honors reduced-motion. */
+  @keyframes jp-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .jp-fade-up {
+    opacity: 0;
+    animation: jp-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .jp-d-1 {
+    animation-delay: 0.08s;
+  }
+  .jp-d-2 {
+    animation-delay: 0.16s;
+  }
+  .jp-d-3 {
+    animation-delay: 0.24s;
+  }
+  .jp-d-4 {
+    animation-delay: 0.32s;
+  }
+  .jp-d-5 {
+    animation-delay: 0.4s;
+  }
+  .jp-d-6 {
+    animation-delay: 0.48s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jp-fade-up {
+      opacity: 1;
+      animation: none;
+    }
+    .jp-float {
+      animation: none;
+    }
+  }
+  /* Hero mockup gentle float */
+  @keyframes jp-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  .jp-float {
+    animation: jp-float 6s ease-in-out infinite;
+  }
+
+  /* ⭐ Departure-recommendation banner — climax entrance + breathing red glow.
+     The banner is the page's #1 visual: it rises in, then keeps a soft pulse. */
+  @keyframes jp-banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes jp-red-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--jp-red) 55%, transparent),
+        0 10px 36px -8px color-mix(in srgb, var(--jp-red) 45%, transparent),
+        0 0 44px -10px color-mix(in srgb, var(--jp-red) 40%, transparent);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--jp-red) 75%, transparent),
+        0 14px 48px -8px color-mix(in srgb, var(--jp-red) 65%, transparent),
+        0 0 72px -8px color-mix(in srgb, var(--jp-red) 60%, transparent);
+    }
+  }
+  .jp-banner-in {
+    animation: jp-banner-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .jp-red-glow {
+    animation: jp-red-pulse 3s ease-in-out infinite;
+  }
+  @keyframes jp-dot-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.8);
+    }
+  }
+  .jp-dot-pulse {
+    animation: jp-dot-pulse 1.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jp-banner-in {
+      opacity: 1;
+      animation: none;
+    }
+    .jp-red-glow,
+    .jp-dot-pulse {
+      animation: none;
+    }
+  }
+
   /* AI FAB glow ring */
   .jp-fab-glow {
     box-shadow:
