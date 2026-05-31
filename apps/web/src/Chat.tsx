@@ -29,12 +29,14 @@ import type {
 } from '@modelcontextprotocol/sdk/types.js';
 
 // ── PDF text extraction ──────────────────────────────────────────────────────
-// Using CDN workerSrc to avoid Vite bundling issues with pdfjs worker.
-const PDFJS_CDN_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.3.31/pdf.worker.min.mjs';
-
+// 워커는 로컬 번들(Vite `?url`)로 로드 — 설치된 pdfjs-dist 버전과 항상 일치한다.
+// (CDN 고정 버전은 라이브러리 버전과 어긋나면 "API version does not match Worker
+//  version"으로 파싱이 통째로 실패하므로 사용하지 않는다.)
 async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import('pdfjs-dist');
-  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_CDN_WORKER;
+  const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url'))
+    .default;
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
   const textParts: string[] = [];

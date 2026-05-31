@@ -34,3 +34,7 @@ out/
 # 내부 기획 문서 — 공개 안 함
 docs/PRD.md
 docs/RALPH-HARNESS-RULES.md
+
+# 데모용 샘플(로컬 테스트)
+samples/*.pdf
+samples/*.txt
