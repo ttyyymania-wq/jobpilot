@@ -58,3 +58,59 @@ V2-001 — Next.js 스캐폴드 + 디자인시스템 + AppShell  [DONE, build GR
 - API Route BFF: app/api/_mcp.ts (callMcp: POST {url}/mcp jsonrpc tools/call, SSE/JSON 파싱→structuredContent, 화이트리스트, process.env 키).
 - MCP 포트: rocketpunch/commute/profile/gcal = 6783~6786. 함정은 docs/RALPH-TASK-v2.md §3 그대로.
 - shadcn 컴포넌트 더 필요하면 수동 셋업 패턴 재사용(위 참고).
+
+============================================================
+V2-002 — API Route BFF — MCP HTTP 브릿지  [DONE, build GREEN, 실측 PASS]
+============================================================
+
+## MCP 응답 포맷 (핵심)
+- MCP 서버 POST /mcp 호출 시 응답은 SSE 포맷: `event: message\ndata: {...}\n\n`
+- data: 내 JSON 구조: `{ result: { content: [{type:'text', text: JSON문자열}], structuredContent: {...} }, jsonrpc:'2.0', id:1 }`
+- **structuredContent 우선** 파싱 → 없으면 content[0].text JSON.parse.
+- source 필드: structuredContent 내 `source: 'live'|'mock'|'cache'` 등 보존 필요.
+
+## SSE 파싱 로직
+- `res.text()` 전체 읽기 → `data: ` 프리픽스 줄 찾아 JSON.parse.
+- plain JSON 폴백(헤더 Accept에 application/json, text/event-stream 둘 다 포함).
+- AbortController로 8초 타임아웃. fetch 실패·타임아웃 시 `{error, source:'error'}` 반환(throw 안 함).
+
+## 실제 도구명 (화이트리스트 정확히)
+- rocketpunch: search_jobs, get_job, search_events
+- commute: geocode_place, get_commute, get_weather, plan_departure
+- profile: parse_resume, match_jobs
+- gcal: gcal_create_event (prefix 있음!), gcal_get_oauth_url, gcal_list_events
+
+## 라우트 구성
+- GET  /api/jobs?q=&location=&experience= → rocketpunch.search_jobs
+- GET  /api/jobs/[id] → rocketpunch.get_job (params: Promise, await 필요)
+- POST /api/match {skills, jobCategories} → profile.match_jobs
+- POST /api/resume {text} → profile.parse_resume
+- POST /api/commute {...origin/dest/arrivalTime} → get_commute + plan_departure 병렬(Promise.all)
+- GET  /api/weather?lat=&lng=&place=&datetime= → commute.get_weather
+- POST /api/geocode {query} → commute.geocode_place
+- POST /api/calendar {summary,location,start,end} → gcal.gcal_create_event
+
+## .env 연결
+- Next API Route → MCP 서버를 HTTP로 호출(localhost:6783~6786 하드코딩).
+- MCP 서버가 ANTHROPIC_API_KEY/ROCKETPUNCH_* 등 키를 들고 있음.
+- Next 자체엔 추가 환경변수 불필요(MCP URL 하드코딩으로 충분).
+
+## 실측 결과
+- lsof -ti:6783 → MCP 서버 UP 확인
+- next dev --port 3099 잠깐 띄워 GET /api/jobs?q=engineer 호출
+- 응답: { source:"live", total:2, jobs:[...] } 200 OK (294ms)
+- 공고 2건: "LLM/Agent Engineer"(Concentrix), "Security Solutions Engineer"(팀스파르타)
+- 검증 후 dev 서버 즉시 kill (상주 금지 규칙 준수)
+
+## 빌드
+- `cd apps/web-next && pnpm build` → Compiled successfully, 타입체크 통과
+- Route 목록에 7개 API Route 전부 ƒ (Dynamic) 로 등록됨
+
+## TypeScript 함정
+- `source = (data as Record).source as string` → union 타입 에러 발생
+- 올바른 패턴: `typeof rawSource === 'string' ? rawSource : 'mcp'` 로 narrowing
+
+## 다음(V2-003) 시작점
+- 프론트엔드 /jobs 페이지에서 /api/jobs를 fetch해 실제 데이터 렌더링.
+- 이력서 PDF 업로드: 프론트에서 텍스트 추출 후 POST /api/resume {text}.
+- Supabase 연동: NEXT_PUBLIC_SUPABASE_URL/ANON 키 추가 필요.

@@ -19,7 +19,7 @@
       "id": "V2-002",
       "title": "API Route BFF — MCP 직접 호출 (LLM 우회)",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "app/api/_mcp.ts: callMcp(server,tool,args) — POST {url}/mcp jsonrpc tools/call, SSE/JSON 파싱→structuredContent, 화이트리스트, process.env 키(평문 금지)",
         "/api/jobs(rocketpunch.search_jobs+로컬필터), /api/match, /api/commute(get_commute+plan_departure), /api/weather, /api/resume, /api/geocode, /api/calendar 라우트",
