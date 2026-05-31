@@ -46,7 +46,7 @@
       "id": "V2-004",
       "title": "면접+통근 상세 (/interviews/[id]) — 데모 클라이맥스, UI 최고",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "헤더카드(회사/일시/장소/D-day)+캘린더(구글 render URL+.ics 다운로드)",
         "⭐출발권장 배너: --jp-error 펄스 등장, 데이터 준비후 렌더(빈깜빡임 방지), 시각 1순위",

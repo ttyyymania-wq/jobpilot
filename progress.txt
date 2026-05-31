@@ -132,3 +132,26 @@ V2-002 — API Route BFF — MCP HTTP 브릿지  [DONE, build GREEN, 실측 PASS
 흐름: 이력서 업로드→PDF 텍스트 추출→/api/resume 파싱→skills 칩 표시→자동 /api/match→매칭 카드(점수순). 검색바는 /api/jobs로 전체 공고 탐색.
 
 검증: next build EXIT 0 (13 static pages). next start :3099 → /jobs HTTP 200, SSR HTML에 드롭존/빈상태 카피 포함 확인 후 종료. 흰화면 없음.
+
+## V2-004 면접+통근 상세 (/interviews/[id]) — 데모 클라이맥스 — 2026-05-31
+
+구현 완료 (passes=true). build: 내 파일들 ✓ Compiled successfully + tsc 0에러,
+/interviews/test HTTP 200 실측(토스·프론트엔드 엔지니어·통근 경로·면접 당일 날씨 렌더 확인) 후 dev 종료.
+※ 전체 next build는 별개 스토리(V2-005/006/007)의 미완성 파일(Placeholder.tsx icon prop 제거, AssistantChat.tsx)에서 타입에러로 실패 — V2-004 코드와 무관.
+
+- app/interviews/[id]/page.tsx ('use client'): use(params)로 id 수신, 목 데이터(토스 FE면접 6/5 14:00 강남)+id 반영.
+- HeaderCard: 회사·직무·일시·장소·D-day칩(D-1이하 destructive 빨강) + [Google 캘린더][.ics 다운로드] 버튼(lib/calendar.ts).
+- DepartureBanner ⭐클라이맥스: --jp-red 빨강 그라데이션 + jp-red-glow 펄스 + jp-banner-in 등장 모션 + jp-dot-pulse 점멸 도트.
+  plan_departure의 recommendedDepartAt(큰 타이포)·reason·bufferMin·추천모드·도착목표 표시.
+  로딩중엔 스켈레톤(빈 빨강 깜빡임 방지), 데이터 준비 후에만 빨강 렌더. 실패시 재시도 버튼.
+- CommuteSection/CommuteCard: 택시🚕·지하철🚇·킥보드🛴 멀티모달 카드3(/api/commute options).
+  소요분/요금, transit는 출발→도착역+환승수, scooter는 이용가능 대수. 추천모드 ⭐배지+blue테두리+ring.
+- WeatherWidget: 도착시각 기준 기온·강수확률·조언, 비예보(isRain/pop≥60) 시 우산 강조+배너 연동.
+- 무클릭 자동 연쇄: geocode(집)+geocode(회사 "강남역") 병렬 → /api/commute(+plan_departure)와 /api/weather 병렬 → departure로 배너.
+  회사 위치는 geocode 자동(되묻지 않음). 집 주소 없으면 HomeOriginForm 1회 입력 → localStorage("jobpilot/home-origin") 재사용.
+- 캘린더 이식: apps/web/Chat.tsx → web-next/lib/calendar.ts.
+  buildGoogleCalendarUrl(summary,start,end,location,details→calendar.google.com TEMPLATE URL), downloadIcs(icsContent,summary→Blob 다운로드).
+- globals.css: jp-banner-in / jp-red-pulse(.jp-red-glow) / jp-dot-pulse 키프레임 추가 + prefers-reduced-motion 처리.
+- 에러 폴백: 통근 실패→통근섹션만 재시도, 날씨 실패→위젯만 "날씨없음", 배너 실패→재시도. 흰화면 없음.
+- 커밋 524f162 (web-next 3파일: page.tsx, lib/calendar.ts, globals.css) → origin feat/v2-003-jobs-dashboard 푸시 완료.
+- 함정: /api/commute scooter 옵션은 {mode,count,source}로 durationMin/fare 없음 → 모드별 분기 렌더 필요.
