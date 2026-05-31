@@ -9,6 +9,7 @@ import {
   type DragEvent,
   type FormEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import {
   AppRenderer,
@@ -585,7 +586,24 @@ function ChatEntryView({
   if (entry.kind === 'tool-call') {
     return <ToolCallView entry={entry} />;
   }
-  return <div className={`msg ${entry.kind}`}>{entry.text}</div>;
+  return (
+    <div className={`msg ${entry.kind}`}>{renderInlineMarkdown(entry.text)}</div>
+  );
+}
+
+/**
+ * 채팅 메시지의 경량 인라인 마크다운 렌더러.
+ * `**볼드**`만 <strong>으로 변환하고 나머지는 그대로 둔다. (별표 노출 방지)
+ * 외부 마크다운 라이브러리 없이 정규식 분할로 처리 — XSS 위험 없음(텍스트 노드만 생성).
+ */
+function renderInlineMarkdown(text: string): ReactNode {
+  if (!text) return text;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    const m = /^\*\*([^*]+)\*\*$/.exec(part);
+    if (m) return <strong key={i}>{m[1]}</strong>;
+    return <span key={i}>{part}</span>;
+  });
 }
 
 function ToolCallView({ entry }: { entry: ToolCallEntry }) {
