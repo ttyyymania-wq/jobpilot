@@ -487,18 +487,118 @@ button {
 
 form {
   display: flex;
-  gap: 10px;
-  align-items: flex-end;
-  padding: 16px 20px 20px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px 20px;
   border-top: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, transparent, var(--bg-app));
   flex-shrink: 0;
   width: 100%;
+  transition: background 0.2s var(--ease-out);
+}
+
+form.drag-over {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-app));
+  border-top-color: var(--accent);
 }
 
 .layout-inline form {
   max-width: 920px;
   margin: 0 auto;
+}
+
+/* Upload feedback bar */
+.upload-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  animation: msg-in 0.22s var(--ease-out);
+}
+
+.upload-bar-loading {
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--fg-muted);
+}
+
+.upload-bar-done {
+  background: color-mix(in srgb, #6db86d 12%, transparent);
+  border: 1px solid color-mix(in srgb, #6db86d 30%, transparent);
+  color: #6db86d;
+}
+
+.upload-bar-error {
+  background: var(--error-bg);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+  color: var(--error);
+}
+
+.upload-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.upload-filename {
+  font-weight: 500;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.upload-msg {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* Composer row: upload btn + textarea + send btn */
+.composer-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+/* Upload button (📎) */
+.upload-btn {
+  width: 44px;
+  height: var(--composer-h);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  font-size: 18px;
+  transition: all 0.18s var(--ease-out);
+  color: var(--fg-muted);
+}
+
+.upload-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  transform: translateY(-1px);
+  color: var(--fg);
+}
+
+.upload-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.upload-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 :root {
@@ -537,7 +637,7 @@ textarea:focus {
   box-shadow: var(--accent-glow);
 }
 
-form button {
+form button:not(.upload-btn) {
   padding: 0 22px;
   background: var(--accent);
   color: var(--user-bubble-fg);
@@ -551,17 +651,17 @@ form button {
   letter-spacing: 0.01em;
 }
 
-form button:hover:not(:disabled) {
+form button:not(.upload-btn):hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 90%, white);
   transform: translateY(-1px);
   box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-form button:active:not(:disabled) {
+form button:not(.upload-btn):active:not(:disabled) {
   transform: translateY(0);
 }
 
-form button:disabled {
+form button:not(.upload-btn):disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

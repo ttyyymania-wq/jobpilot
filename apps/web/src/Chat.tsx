@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
   type FormEvent,
   type KeyboardEvent,
 } from 'react';
@@ -26,6 +27,40 @@ import type {
   ReadResourceRequest,
   ReadResourceResult,
 } from '@modelcontextprotocol/sdk/types.js';
+
+// ── PDF text extraction ──────────────────────────────────────────────────────
+// Using CDN workerSrc to avoid Vite bundling issues with pdfjs worker.
+const PDFJS_CDN_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.3.31/pdf.worker.min.mjs';
+
+async function extractPdfText(file: File): Promise<string> {
+  const pdfjs = await import('pdfjs-dist');
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_CDN_WORKER;
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const textParts: string[] = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item) => ('str' in item ? item.str : ''))
+      .join(' ');
+    textParts.push(pageText);
+  }
+  return textParts.join('\n');
+}
+
+const MAX_RESUME_CHARS = 20000;
+
+async function extractFileText(file: File): Promise<string | null> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (ext === 'pdf') {
+    return extractPdfText(file);
+  }
+  if (ext === 'txt' || ext === 'md') {
+    return file.text();
+  }
+  return null;
+}
 
 /**
  * The hook's drop-in `<AppRenderer onMessage>` handler. The sample
@@ -193,6 +228,13 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
   const [layout, setLayout] = useState<LayoutMode>('panel');
   const historyRef = useRef<HTMLDivElement | null>(null);
 
+  // ── File upload state ─────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadState, setUploadState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [uploadFileName, setUploadFileName] = useState<string>('');
+  const [uploadMsg, setUploadMsg] = useState<string>('');
+  const [dragOver, setDragOver] = useState(false);
+
   useEffect(() => {
     if (hostDisplayMode === undefined) return;
     setLayout(hostDisplayMode === 'inline' ? 'inline' : 'panel');
@@ -223,6 +265,70 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
     setPrompt('');
     void send(text);
   };
+
+  const processUploadedFile = useCallback(async (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (ext !== 'pdf' && ext !== 'txt' && ext !== 'md') {
+      setUploadFileName(file.name);
+      setUploadState('error');
+      setUploadMsg('지원하지 않는 형식입니다. .txt / .md / .pdf 또는 텍스트로 붙여넣어 주세요.');
+      return;
+    }
+    setUploadFileName(file.name);
+    setUploadState('loading');
+    setUploadMsg('');
+    try {
+      const text = await extractFileText(file);
+      if (text === null || text.trim().length === 0) {
+        setUploadState('error');
+        setUploadMsg('텍스트를 추출할 수 없었습니다. 텍스트로 붙여넣어 주세요.');
+        return;
+      }
+      let body = text.trim();
+      let truncated = false;
+      if (body.length > MAX_RESUME_CHARS) {
+        body = body.slice(0, MAX_RESUME_CHARS);
+        truncated = true;
+      }
+      const message = `다음은 제 이력서입니다. 분석해서 맞는 공고를 찾아주세요:\n\n${body}${truncated ? '\n\n(※ 이력서가 너무 길어 앞부분만 전송됐습니다.)' : ''}`;
+      setUploadState('done');
+      setUploadMsg(truncated ? '이력서가 길어 앞부분만 전송됩니다.' : '');
+      void send(message);
+      // Reset after a short delay so user sees feedback
+      setTimeout(() => {
+        setUploadState('idle');
+        setUploadFileName('');
+        setUploadMsg('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }, 2000);
+    } catch (err) {
+      console.warn('[Upload] extraction failed', err);
+      setUploadState('error');
+      setUploadMsg('파일 읽기 실패. 텍스트로 붙여넣어 주세요.');
+    }
+  }, [send]);
+
+  const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) void processUploadedFile(file);
+  }, [processUploadedFile]);
+
+  const onDragOver = useCallback((e: DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+  }, []);
+
+  const onDrop = useCallback((e: DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void processUploadedFile(file);
+  }, [processUploadedFile]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (
@@ -304,41 +410,83 @@ export function Chat({ agentEndpoint, sandboxUrl }: ChatProps) {
           ))}
         </div>
 
-        <form onSubmit={onSubmit}>
-          <textarea
-            name="prompt"
-            placeholder="이력서를 붙여넣거나, 공고를 찾아달라고 해보세요  (Shift+Enter 줄바꿈)"
-            rows={1}
-            autoFocus
-            value={prompt}
-            disabled={sending}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              setPrompt(e.target.value)
-            }
-            onKeyDown={onKeyDown}
-          />
-          <button
-            type={sending ? 'button' : 'submit'}
-            disabled={!sending && !prompt.trim()}
-            onClick={sending ? abort : undefined}
-            aria-label={sending ? 'Stop' : 'Send'}
-            title={sending ? 'Stop' : 'Send'}
-          >
-            {sending ? (
-              <span
-                aria-hidden="true"
-                style={{
-                  display: 'inline-block',
-                  width: 10,
-                  height: 10,
-                  background: 'currentColor',
-                  borderRadius: 2,
-                }}
-              />
-            ) : (
-              'Send'
-            )}
-          </button>
+        <form
+          onSubmit={onSubmit}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className={dragOver ? 'drag-over' : ''}
+        >
+          {/* Upload feedback bar */}
+          {uploadState !== 'idle' ? (
+            <div className={`upload-bar upload-bar-${uploadState}`}>
+              {uploadState === 'loading' ? (
+                <span className="upload-spinner" aria-hidden="true" />
+              ) : uploadState === 'done' ? (
+                <span aria-hidden="true">✓</span>
+              ) : (
+                <span aria-hidden="true">✕</span>
+              )}
+              <span className="upload-filename">{uploadFileName}</span>
+              {uploadMsg ? <span className="upload-msg">{uploadMsg}</span> : null}
+            </div>
+          ) : null}
+          <div className="composer-row">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.md,.pdf"
+              style={{ display: 'none' }}
+              onChange={onFileChange}
+              aria-label="이력서 파일 업로드"
+            />
+            {/* Upload button */}
+            <button
+              type="button"
+              className="upload-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending || uploadState === 'loading'}
+              title="이력서 파일 업로드 (.txt / .md / .pdf)"
+              aria-label="이력서 파일 업로드"
+            >
+              📎
+            </button>
+            <textarea
+              name="prompt"
+              placeholder="이력서 파일을 드래그하거나 📎로 올리세요  (Shift+Enter 줄바꿈)"
+              rows={1}
+              autoFocus
+              value={prompt}
+              disabled={sending}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                setPrompt(e.target.value)
+              }
+              onKeyDown={onKeyDown}
+            />
+            <button
+              type={sending ? 'button' : 'submit'}
+              disabled={!sending && !prompt.trim()}
+              onClick={sending ? abort : undefined}
+              aria-label={sending ? 'Stop' : 'Send'}
+              title={sending ? 'Stop' : 'Send'}
+            >
+              {sending ? (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: 10,
+                    height: 10,
+                    background: 'currentColor',
+                    borderRadius: 2,
+                  }}
+                />
+              ) : (
+                'Send'
+              )}
+            </button>
+          </div>
         </form>
       </aside>
 
